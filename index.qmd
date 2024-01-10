@@ -1,15 +1,12 @@
 ---
-title: "My website and data analysis portfolio"
+title: "Ranni Tewfik's Website and Data Analysis Portfolio"
 ---
+### Welcome to my website and portfolio!
 
-# Hello
 
-### And hello again
-
-Welcome to **my website** and _data analysis portfolio._ 
-
+![](Headshot.jpg)
 
 * Please use the `Menu Bar` above to look around.
 * Have fun!
 
-**Feel free to change this text any way you want 😁!**
+You can contact me at **rtewfik@uga.edu**

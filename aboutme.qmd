@@ -1,7 +1,42 @@
 ---
-title: "About me"
+title: "About Me"
 ---
+![](Me.jpg)
 
-Add some text and a figure describing myself.
+## Background
 
-For details, see the exercise instructions. 
+Hi! My name is Ranni Tewfik, and I am a first-year PhD student in Epidemiology at UGA. I have lived in Metro Atlanta all my life, and I look forward to spending the next few years in Athens. Go Dawgs!
+
+## Education
+
+* PhD, Epidemiology, University of Georgia, 2023 - Present
+
+* MPH, Global Epidemiology, Emory University, 2021 - 2023
+
+* MA, Spanish, Georgia State University, 2012 - 2014
+
+* BS, Biology, Georgia Institute of Technology, 2005 - 2009
+
+## Research
+
+My research interest is infectious disease epidemiology of vulnerable populations, including low-resource communities, immigrants, and refugees. I'm particularly interested in interventions that reduce morbidity and mortality from diseases in humanitarian emergencies and international settings. 
+
+Currently, I work with Dr. John McCracken, whose research focuses on the impact of household air pollution on maternal and child health in Guatemala. The Household Air Pollution Intervention Network (HAPIN) Trial is an international, multi-center study that assesses clean cooking fuel exposure and health. As part of HAPIN-Guatemala, we analyze data for the primary outcomes: low birth weight, severe pneumonia incidence, and stunting in children, and blood pressure in older adult women.
+
+To learn more about my research group and the data analyses we have done so far, please visit the [HAPIN](https://www.hapintrial.org/index.html) website.
+
+## Data Analysis Experience
+
+* **R:** intermediate proficiency; coding and data analysis experience as Research Assistant at UGA
+
+* **SAS:** intermediate proficiency; coding and data analysis experience as Research Assistant at Emory
+
+* **Stata:** beginner proficiency; coding and data analysis experience in specialized course at Emory
+
+## MADA Course
+
+I hope to learn about modern tools for data analysis in the Modern Applied Data Analysis course. I'm a bit familiar with some statistical programs, but I'm less familiar with GitHub and Quarto. Also, I'd like more experience with cleaning and processing real-world data.
+
+## Fun Fact
+
+I love to travel. Whether it's a weeklong trip to India or a weekend getaway to Indiana, count me in! I've been to every continent, except Antarctica, but I hope to check that off my list in the future.
