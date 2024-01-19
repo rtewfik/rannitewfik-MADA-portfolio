@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.537">
+<meta name="generator" content="quarto-1.4.538">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2024-01-18">
+<meta name="author" content="Ranni Tewfik">
+<meta name="dcterms.date" content="2024-01-19">
 
-<title>Ranni Tewfik Data Analysis Portfolio - Manuscript/Report Template for a Data Analysis Project</title>
+<title>Ranni Tewfik Data Analysis Portfolio - Starter Analysis Exercise Report</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -161,7 +161,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Manuscript/Report Template for a Data Analysis Project</h1>
+<h1 class="title">Starter Analysis Exercise Report</h1>
 </div>
 
 
@@ -171,14 +171,14 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Your Name </p>
+             <p>Ranni Tewfik </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 18, 2024</p>
+      <p class="date">January 19, 2024</p>
     </div>
   </div>
   
@@ -190,8 +190,13 @@ div.csl-indent {
 </header>
 
 
-<p>The structure below is one possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed. You don’t need to have exactly these sections, but the content covering those sections should be addressed.</p>
+<p>Chaohua Li contributed to this exercise.</p>
 <p>This uses MS Word as output format. <a href="https://quarto.org/docs/output-formats/ms-word.html">See here</a> for more information. You can switch to other formats, like html or pdf. See <a href="https://quarto.org/">the Quarto documentation</a> for other formats.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'here' was built under R version 4.3.2</code></pre>
+</div>
+</div>
 <section id="summaryabstract" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Summary/Abstract</h1>
 <p><em>Write a summary of your project.</em></p>
@@ -249,19 +254,19 @@ Table&nbsp;1: Data summary table.
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
 <colgroup>
-<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 6%">
+<col style="width: 4%">
+<col style="width: 6%">
 <col style="width: 7%">
-<col style="width: 5%">
 <col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 8%">
-<col style="width: 9%">
+<col style="width: 11%">
 <col style="width: 6%">
 <col style="width: 5%">
 <col style="width: 5%">
-<col style="width: 6%">
-<col style="width: 6%">
-<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
 <col style="width: 6%">
 <col style="width: 6%">
 </colgroup>
@@ -303,6 +308,23 @@ Table&nbsp;1: Data summary table.
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">Blood</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">A: 4, B: 2, O: 2, AB: 1</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">numeric</td>
 <td style="text-align: left;">Height</td>
 <td style="text-align: right;">0</td>
@@ -319,7 +341,7 @@ Table&nbsp;1: Data summary table.
 <td style="text-align: right;">183</td>
 <td style="text-align: left;">▂▁▃▃▇</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">numeric</td>
 <td style="text-align: left;">Weight</td>
 <td style="text-align: right;">0</td>
@@ -335,6 +357,23 @@ Table&nbsp;1: Data summary table.
 <td style="text-align: right;">80</td>
 <td style="text-align: right;">110</td>
 <td style="text-align: left;">▇▂▃▂▂</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">IQ</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">108.33333</td>
+<td style="text-align: right;">10.39230</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">103</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">116</td>
+<td style="text-align: right;">125</td>
+<td style="text-align: left;">▂▅▇▅▂</td>
 </tr>
 </tbody>
 </table>
@@ -353,7 +392,7 @@ Table&nbsp;1: Data summary table.
 <div id="fig-result" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="../../results/figures/height-weight-stratified.png" class="img-fluid figure-img">
+<img src="../../results/figures/height-weight-stratified.png" class="img-fluid figure-img" width="1050">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Height and weight stratified by gender.
@@ -366,7 +405,7 @@ Figure&nbsp;1: Height and weight stratified by gender.
 <section id="full-analysis" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="full-analysis"><span class="header-section-number">4.3</span> Full analysis</h2>
 <p><em>Use one or several suitable statistical/machine learning methods to analyze your data and to produce meaningful figures, tables, etc. This might again be code that is best placed in one or several separate R scripts that need to be well documented. You want the code to produce figures and data ready for display as tables, and save those. Then you load them here.</em></p>
-<p>Example <a href="#tbl-resulttable2" class="quarto-xref">Table&nbsp;2</a> shows a summary of a linear model fit.</p>
+<p><a href="#tbl-resulttable2" class="quarto-xref">Table&nbsp;2</a> shows a summary of a linear model fit.</p>
 <div class="cell">
 <div id="tbl-resulttable2" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -441,17 +480,113 @@ Table&nbsp;2: Linear model fit table.
 <p>This paper <span class="citation" data-cites="leek2015">(<a href="#ref-leek2015" role="doc-biblioref">Leek &amp; Peng, 2015</a>)</span> discusses types of analyses.</p>
 <p>These papers <span class="citation" data-cites="mckay2020 mckay2020a">(<a href="#ref-mckay2020" role="doc-biblioref">McKay, Ebell, Billings, et al., 2020</a>; <a href="#ref-mckay2020a" role="doc-biblioref">McKay, Ebell, Dale, et al., 2020</a>)</span> are good examples of papers published using a fully reproducible setup similar to the one shown in this template.</p>
 <p>Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal <a href="https://www.zotero.org/styles">are available</a>. You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like, I just used the generic word <code>references.bib</code> but giving it a more descriptive name is probably better.</p>
+</section>
+</section>
+<section id="class-exercise" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Class Exercise</h1>
+<p>This exercise used data from 9 participants and investigated 5 variables: height, weight, gender, blood type, and IQ score.</p>
+<p><a href="#fig-result2" class="quarto-xref">Figure&nbsp;2</a> shows a box plot figure with blood type on the x-axis and height on the y-axis. On average, blood type A has the shortest height, and blood types AB and B have the tallest height. The plots for blood types B and O are relatively normally distributed, whereas the plot for blood type A has a negative skew. Blood type AB does not show a box plot because of the small sample size, which is expected because type AB is the rarest blood type.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-result2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-result2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../../results/figures/Boxplot_Blood type-Height.png" class="img-fluid figure-img" width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Blood type and height.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-result3" class="quarto-xref">Figure&nbsp;3</a> shows a scatter plot figure with weight on the x-axis and IQ score on the y-axis. The plot shows a reciprocal relationship between weight and IQ score: as weight increases, IQ score decreases. This observed association is expected based on studies that link obesity and lower IQ level.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-result3" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-result3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../../results/figures/weight-IQ.png" class="img-fluid figure-img" width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Weight and IQ score.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#tbl-resulttable3" class="quarto-xref">Table&nbsp;3</a> shows a summary of a linear model fit with height as the outcome and blood type and IQ score as the predictors. Neither blood type nor IQ score is significantly associated with height. The other variables (weight and gender) should be included in the model to see if they are better predictors of height.</p>
+<div class="cell">
+<div id="tbl-resulttable3" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-resulttable3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Linear model fit table.
+</figcaption>
+<div aria-describedby="tbl-resulttable3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">71.1618230</td>
+<td style="text-align: right;">48.969923</td>
+<td style="text-align: right;">1.453174</td>
+<td style="text-align: right;">0.2198364</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IQ</td>
+<td style="text-align: right;">0.7496697</td>
+<td style="text-align: right;">0.435887</td>
+<td style="text-align: right;">1.719872</td>
+<td style="text-align: right;">0.1605742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BloodAB</td>
+<td style="text-align: right;">25.6248349</td>
+<td style="text-align: right;">13.410169</td>
+<td style="text-align: right;">1.910851</td>
+<td style="text-align: right;">0.1286197</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">BloodB</td>
+<td style="text-align: right;">29.1228534</td>
+<td style="text-align: right;">10.765615</td>
+<td style="text-align: right;">2.705173</td>
+<td style="text-align: right;">0.0538053</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BloodO</td>
+<td style="text-align: right;">17.8725231</td>
+<td style="text-align: right;">10.888454</td>
+<td style="text-align: right;">1.641420</td>
+<td style="text-align: right;">0.1760545</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
 <div style="page-break-after: always;"></div>
 </section>
-</section>
-<section id="references" class="level1" data-number="6">
+<section id="references" class="level1" data-number="7">
 
 
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">7 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-leek2015" class="csl-entry" role="listitem">
 Leek, J. T., &amp; Peng, R. D. (2015). Statistics. <span>What</span> is the question? <em>Science (New York, N.Y.)</em>, <em>347</em>(6228), 1314–1315. <a href="https://doi.org/10.1126/science.aaa6146">https://doi.org/10.1126/science.aaa6146</a>
 </div>
