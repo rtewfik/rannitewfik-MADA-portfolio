@@ -15,7 +15,7 @@ website:
           - text: "R Coding Exercise"
             file: coding-exercise/coding-exercise.qmd
           - text: "Presentation Exercise"
-            file: presentation-exercise.qmd
+            file: presentation-exercise/presentation-exercise.qmd
           - text: "Tidy Tuesday Exercise"
             file: tidytuesday-exercise/tidytuesday-exercise.qmd
           - text: "Data Exercise"
