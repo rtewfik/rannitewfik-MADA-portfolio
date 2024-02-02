@@ -1,0 +1,146 @@
+---
+title: "Data Exercise"
+---
+## Part 1 - Generating Synthetic Dataset and Checking Data
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+#Set seed for reproducibility
+set.seed(123)
+
+#Set sample size
+n <- 100
+
+#Create ages between 18 and 79
+age <- sample(18:79, n, replace = TRUE)
+
+#Create sexes (male or female)
+sex <- sample(c("male", "female"), n, replace = TRUE)
+
+#Create hypertension status (yes or no)
+hypertension <- sample(c("yes", "no"), n, replace = TRUE)
+
+#Create total cholesterol levels between 125 and 275, assuming males have higher total cholesterol than females
+cholesterol <- ifelse(sex == "male", rnorm(n, mean = 220, sd = 20), rnorm(n, mean = 200, sd = 20))
+cholesterol <- pmax(pmin(cholesterol, 275), 125)
+
+#Create heart health scores between 25 and 90, assuming those with higher total cholesterol have higher heart health scores
+heart_health <- 50 + 0.2 * cholesterol + rnorm(n, mean = 0, sd = 10)
+heart_health <- pmax(pmin(heart_health, 90), 25)
+
+#Create a data frame to store the generated data
+heart <- data.frame(age = age, sex = sex, hypertension = hypertension, cholesterol = cholesterol, heart_health = heart_health)
+
+#Get an overview and summary of the data
+str(heart)
+summary(heart)
+```
+
+
+## Part 2 - Processing Data
+
+```{r}
+#Assign only males in the "heart" dataset to a new object
+heart_males <- subset(heart, sex == "male")
+
+#Assign only females in the "heart" dataset to a new object
+heart_females <- subset(heart, sex == "female")
+
+#Get an overview and summary of the new objects
+str(heart_males)
+summary(heart_males)
+
+str(heart_females)
+summary(heart_females)
+```
+
+
+## Part 3 - Plotting Data
+
+```{r}
+#Plot heart health as a function of age for males and females
+ggplot(heart_males, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Age and Heart Health Score Among Males")
+
+ggplot(heart_females, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Age and Heart Health Score Among Females")
+```
+
+
+There is no noticeable correlation between age and heart health score for either males or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+
+
+```{r}
+#Plot heart health as a function of cholesterol for males and females
+ggplot(heart_males, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Males")
+
+ggplot(heart_females, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Females")
+```
+
+
+There is no noticeable correlation between total cholesterol and heart health score for either males or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+
+
+## Part 4 - More Data Processing
+
+```{r}
+#Create a new object by extracting only the data for those with hypertension from the "heart" dataset
+heart_hypertension <- subset(heart, hypertension == "yes")
+
+#Get an overview and summary of the new object
+str(heart_hypertension)
+summary(heart_hypertension)
+```
+
+
+## Part 5 - More Data Plotting
+
+```{r}
+#Plot heart health as a function of age for those with hypertension
+ggplot(heart_hypertension, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Age and Heart Health Score Among Those With Hypertension")
+```
+
+
+There is no noticeable correlation between age and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+
+
+```{r}
+#Plot heart health as a function of cholesterol for those with hypertension
+ggplot(heart_hypertension, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Those With Hypertension")
+```
+
+
+There is no noticeable correlation between total cholesterol and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+
+
+## Part 6 - Fitting Simple Models
+
+```{r}
+#Fit heart health as the outcome and age and cholesterol as the predictors for males
+males <- lm(heart_health ~ age + cholesterol, data = heart_males)
+summary(males)
+```
+
+
+Among males, total cholesterol is significantly associated with heart health score (p-value = 0.01), controlling for age; however, age is not significantly associated with hearth health score, controlling for total cholesterol (p-value = 0.64). The low R-squared value indicates that only 16% of the variation in heart health score is explained by the model.
+
+
+```{r}
+#Fit heart health as the outcome and age and cholesterol as the predictors for females
+females <- lm(heart_health ~ age + cholesterol, data = heart_females)
+summary(females)
+```
+
+
+Among females, neither age (p-value = 0.31) nor total cholesterol (p-value = 0.08) is significantly associated with heart health, controlling for other variables. The low R-squared value indicates that only 10% of the variation in heart health score is explained by the model.
+
+
+```{r}
+#Fit heart health as the outcome and age and cholesterol as the predictors for those with hypertension
+htn <- lm(heart_health ~ age + cholesterol, data = heart_hypertension)
+summary(htn)
+```
+
+
+
+Among those with hypertension, total cholesterol is significantly associated with heart health score (p-value = 0.01), controlling for age; however, age is not significantly associated with hearth health score, controlling for total cholesterol (p-value = 0.53). The low R-squared value indicates that only 13% of the variation in heart health score is explained by the model.
