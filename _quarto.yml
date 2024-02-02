@@ -15,11 +15,12 @@ website:
           - text: "R Coding Exercise"
             file: coding-exercise/coding-exercise.qmd
           - text: "Data Exercise"
-            file: data-excercise/data-exercise.qmd
+            file: data-exercise/data-exercise.qmd
           - text: "Presentation Exercise"
             file: presentation-exercise/presentation-exercise.qmd
           - text: "Tidy Tuesday Exercise"
             file: tidytuesday-exercise/tidytuesday-exercise.qmd
+        
     right:
       - icon: github 
         href: https://github.com/rtewfik/rannitewfik-MADA-portfolio        
