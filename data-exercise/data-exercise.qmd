@@ -74,7 +74,7 @@ ggplot(heart_males, aes(x = cholesterol, y = heart_health)) + geom_point() + ggt
 ggplot(heart_females, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Females")
 ```
 
-There is no noticeable correlation between total cholesterol and heart health score for either males or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+There is a positive correlation between total cholesterol and heart health score for males but no noticeable correlation or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
 
 ## Part 4 - More Data Processing
 
@@ -101,7 +101,7 @@ There is no noticeable correlation between age and heart health score for those 
 ggplot(heart_hypertension, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Those With Hypertension")
 ```
 
-There is no noticeable correlation between total cholesterol and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
+There is a positive correlation between total cholesterol and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
 
 ## Part 6 - Fitting Simple Models
 
