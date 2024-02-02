@@ -1,6 +1,7 @@
 ---
 title: "Data Exercise"
 ---
+
 ## Part 1 - Generating Synthetic Dataset and Checking Data
 
 ```{r}
@@ -38,7 +39,6 @@ str(heart)
 summary(heart)
 ```
 
-
 ## Part 2 - Processing Data
 
 ```{r}
@@ -56,7 +56,6 @@ str(heart_females)
 summary(heart_females)
 ```
 
-
 ## Part 3 - Plotting Data
 
 ```{r}
@@ -66,9 +65,7 @@ ggplot(heart_males, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Ag
 ggplot(heart_females, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Age and Heart Health Score Among Females")
 ```
 
-
 There is no noticeable correlation between age and heart health score for either males or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
-
 
 ```{r}
 #Plot heart health as a function of cholesterol for males and females
@@ -77,9 +74,7 @@ ggplot(heart_males, aes(x = cholesterol, y = heart_health)) + geom_point() + ggt
 ggplot(heart_females, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Females")
 ```
 
-
 There is no noticeable correlation between total cholesterol and heart health score for either males or females. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
-
 
 ## Part 4 - More Data Processing
 
@@ -92,7 +87,6 @@ str(heart_hypertension)
 summary(heart_hypertension)
 ```
 
-
 ## Part 5 - More Data Plotting
 
 ```{r}
@@ -100,18 +94,14 @@ summary(heart_hypertension)
 ggplot(heart_hypertension, aes(x = age, y = heart_health)) + geom_point() + ggtitle("Age and Heart Health Score Among Those With Hypertension")
 ```
 
-
 There is no noticeable correlation between age and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
-
 
 ```{r}
 #Plot heart health as a function of cholesterol for those with hypertension
 ggplot(heart_hypertension, aes(x = cholesterol, y = heart_health)) + geom_point() + ggtitle("Total Cholesterol and Heart Health Score Among Those With Hypertension")
 ```
 
-
 There is no noticeable correlation between total cholesterol and heart health score for those with hypertension. There are several data points at heart health = 90, which is more than expected. This study sample may be healthier than the average population.
-
 
 ## Part 6 - Fitting Simple Models
 
@@ -121,9 +111,7 @@ males <- lm(heart_health ~ age + cholesterol, data = heart_males)
 summary(males)
 ```
 
-
 Among males, total cholesterol is significantly associated with heart health score (p-value = 0.01), controlling for age; however, age is not significantly associated with hearth health score, controlling for total cholesterol (p-value = 0.64). The low R-squared value indicates that only 16% of the variation in heart health score is explained by the model.
-
 
 ```{r}
 #Fit heart health as the outcome and age and cholesterol as the predictors for females
@@ -131,16 +119,12 @@ females <- lm(heart_health ~ age + cholesterol, data = heart_females)
 summary(females)
 ```
 
-
 Among females, neither age (p-value = 0.31) nor total cholesterol (p-value = 0.08) is significantly associated with heart health, controlling for other variables. The low R-squared value indicates that only 10% of the variation in heart health score is explained by the model.
-
 
 ```{r}
 #Fit heart health as the outcome and age and cholesterol as the predictors for those with hypertension
 htn <- lm(heart_health ~ age + cholesterol, data = heart_hypertension)
 summary(htn)
 ```
-
-
 
 Among those with hypertension, total cholesterol is significantly associated with heart health score (p-value = 0.01), controlling for age; however, age is not significantly associated with hearth health score, controlling for total cholesterol (p-value = 0.53). The low R-squared value indicates that only 13% of the variation in heart health score is explained by the model.
