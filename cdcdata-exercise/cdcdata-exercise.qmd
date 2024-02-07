@@ -1,0 +1,104 @@
+---
+title: "CDC Data Exercise"
+---
+
+
+## Part 1 - About the Data
+
+The "NCHS - Leading Causes of Death: United States" dataset used for this exercise provides data on the age-adjusted death rates for the 10 leading causes of death in the U.S. (1999-2017). The source is the mortality data from the National Vital Statistics System (CDC/NCHS).
+
+Resident death certificates from all 50 states and D.C. were used to collect the data on demographic and medical characteristics. Age-adjusted death rates (per 100,000 population) are based on the 2000 U.S. standard population. Populations used for computing death rates after 2010 are postcensal estimates based on the 2010 census.
+
+The dataset has 10,868 observations and six variables: year, X113 cause name (specific cause of death), cause name (categorical cause of death), state, deaths, and age-adjusted death rate. To learn more about the data, please visit the [CDC](https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu/about_data) website.
+
+
+## Part 2 - Processing the Data
+
+```{r}
+#Load the required packages
+library(dplyr)
+library(ggplot2)
+
+#Load the raw data
+cdc_raw <- read.csv("NCHS_Leading_Causes_of_Death.csv")
+
+#Get an overview and summary of the raw data
+str(cdc_raw)
+summary(cdc_raw)
+
+#Check for weird symbols or missing values in all six variables
+table(cdc_raw$Year, useNA = "always")
+table(cdc_raw$X113.Cause.Name, useNA = "always")
+table(cdc_raw$Cause_Name, useNA = "always")
+table(cdc_raw$State, useNA = "always")
+summary(cdc_raw$Deaths)
+summary(cdc_raw$Age_Adjusted_Death_Rate)
+
+#Drop the "X113.Cause.Name" variable for the processed data
+cdc <- select(cdc_raw, -X113.Cause.Name)
+attach(cdc)
+
+#Get an overview and summary of the processed data
+str(cdc)
+summary(cdc)
+```
+
+
+There are no weird symbols or missing values in the raw data. Because the variables for "X113 cause name" and "cause name" provide the same information, the variable for "X113 cause name" is removed from the processed data. The new dataset has 10,868 observations and five variables: year, cause name, state, deaths, and age-adjusted death rate.
+
+
+## Part 3 - Exploring the Data
+
+```{r}
+#Summary tables for the categorical variable "Year"
+table(Year)
+prop.table(table(Year))
+```
+
+
+19 years (1999-2017) are represented in the categorical variable "Year", each with 572 observations (5.3%).
+
+
+```{r}
+#Summary tables for the categorical variable "Cause_Name"
+table(Cause_Name)
+prop.table(table(Cause_Name))
+```
+
+
+11 cause categories are represented in the categorical variable "Cause_Name", each with 988 observations (9.1%). The cause categories are "All causes", "Alzheimer's disease", "Cancer", "CLRD", "Diabetes", "Heart disease", "Influenza and pneumonia", "Kidney disease", "Stroke", "Suicide", and "Unintentional injuries".
+
+
+```{r}
+#Summary tables for the categorical variable "State"
+table(State)
+prop.table(table(State))
+```
+
+
+52 states/districts are represented in the categorical variable "State", each with 209 observations (1.9%). All 50 states are represented, as well as "District of Columbia" and "United States".
+
+
+```{r}
+#Summary statistics and histogram for the continuous variable "Deaths"
+summary(Deaths)
+sd(Deaths)
+
+ggplot(cdc, aes(x = Deaths)) + geom_histogram(aes(y = after_stat(density), fill = "red"), bins = 50) + stat_function(fun = dnorm, args = with(cdc, c(mean = mean(Deaths), sd = sd(Deaths)))) + scale_x_continuous("Number of Deaths") + ggtitle("Histogram with Normal Curve")
+```
+
+
+The histogram for the continuous variable "Deaths" does not show an approximately normal distribution. The mean is 15,460 deaths, and the standard deviation is 112,876 deaths.
+
+
+```{r}
+#Summary statistics and histogram for the continuous variable "Age_Adjusted_Death_Rate"
+summary(Age_Adjusted_Death_Rate)
+sd(Age_Adjusted_Death_Rate)
+
+ggplot(cdc, aes(x = Age_Adjusted_Death_Rate)) + geom_histogram(aes(y = after_stat(density), fill = "red"), bins = 50) + stat_function(fun = dnorm, args = with(cdc, c(mean = mean(Age_Adjusted_Death_Rate), sd = sd(Age_Adjusted_Death_Rate)))) + scale_x_continuous("Age-Adjusted Death Rate") + ggtitle("Histogram with Normal Curve")
+```
+
+
+The histogram for the continuous variable "Age_Adjusted_Death_Rate" does not show an approximately normal distribution. The mean is 127.6 deaths per 100,000 population, and the standard deviation is 223.6 deaths per 100,000 population.
+
