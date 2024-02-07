@@ -17,7 +17,7 @@ website:
           - text: "Data Exercise"
             file: data-exercise/data-exercise.qmd
           - text: "Data Analysis Exercise"
-            file: cdcdata-exercise.qmd
+            file: cdcdata-exercise/cdcdata-exercise.qmd
           - text: "Presentation Exercise"
             file: presentation-exercise/presentation-exercise.qmd
           - text: "Tidy Tuesday Exercise"

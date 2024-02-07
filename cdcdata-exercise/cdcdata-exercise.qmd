@@ -9,7 +9,7 @@ The "NCHS - Leading Causes of Death: United States" dataset used for this exerci
 
 Resident death certificates from all 50 states and D.C. were used to collect the data on demographic and medical characteristics. Age-adjusted death rates (per 100,000 population) are based on the 2000 U.S. standard population. Populations used for computing death rates after 2010 are postcensal estimates based on the 2010 census.
 
-The dataset has 10,868 observations and six variables: year, X113 cause name (specific cause of death), cause name (categorical cause of death), state, deaths, and age-adjusted death rate. To learn more about the data, please visit: https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu/about_data
+The dataset has 10,868 observations and six variables: year, X113 cause name (specific cause of death), cause name (categorical cause of death), state, deaths, and age-adjusted death rate. To learn more about the data, please visit the [CDC](https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu/about_data) website.
 
 
 ## Part 2 - Processing the Data
