@@ -2,4 +2,176 @@
 title: "Presentation Exercise"
 ---
 
-Placeholder file for the future data/results presentation exercise.
+
+## Part 1 - About the Data
+
+The article "The Most Common Unisex Names In America: Is Yours One Of Them?" on the FiveThirtyEight website provides information on the most common unisex names in America in which at least one-third of recipients were male and at least one-third were female, through the year 2013. To read the original article, please visit the [FiveThirtyEight](https://fivethirtyeight.com/features/there-are-922-unisex-names-in-america-is-yours-one-of-them/) website.
+
+The "unisex_names_table.csv" file contains the data used for this exercise. The dataset has 919 observations and five variables: "name" (first names from the Social Security Administration), "total" (total number of living Americans with the name), "male_share" (percentage of people with the name who are male), "female_share" (percentage of people with the name who are female), and "gap" (gap between male_share and female_share). To learn more about the data, please visit the [GitHub](https://github.com/fivethirtyeight/data/tree/master/unisex-names) website.
+
+
+## Part 2 - Re-create the Original Graphs
+
+
+First, I used ChatGPT to help me try to re-create the original graph in the article "The Most Common Unisex Names In America: Is Yours One Of Them?" on the FiveThirtyEight website.
+
+ChatGPT prompt:
+
+"Write R code that re-creates the same graph titled "The Most Common Unisex Names In America" on the webpage https://fivethirtyeight.com/features/there-are-922-unisex-names-in-america-is-yours-one-of-them/ using the data of the first 20 observations from the unisex_names_table.csv file on the webpage https://github.com/fivethirtyeight/data/tree/master/unisex-names. Add thorough documentation to the code."
+
+
+```{r}
+# Load necessary libraries
+library(readr)
+library(ggplot2)
+
+# Load the data from the CSV file
+data_url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/unisex-names/unisex_names_table.csv"
+unisex_data <- read_csv(data_url)
+
+# Take only the first 20 observations
+top_20_names <- head(unisex_data, 20)
+
+# Convert the 'name' column to a factor to ensure correct ordering
+top_20_names$name <- factor(top_20_names$name, levels = unique(top_20_names$name))
+
+# Create the bar plot
+plot <- ggplot(top_20_names, aes(y = name)) +
+  geom_bar(aes(x = male_share, fill = "Male"), stat = "identity", orientation = "y") +
+  geom_bar(aes(x = -female_share, fill = "Female"), stat = "identity", orientation = "y") +
+  scale_fill_manual(values = c("Male" = "#008FD5", "Female" = "#FFA500")) +
+  labs(title = "Top 20 Unisex Names: Male and Female Share",
+       x = "Percentage",
+       y = "Name",
+       fill = "Gender") +
+  theme_minimal() +
+  theme(legend.position = "top", 
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(size = 12))
+
+# Display the plot
+plot
+```
+
+
+Then I manually edited the code produced by ChatGPT to re-create the original graph as close as possible.
+
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(scales)
+
+# Load the data from the CSV file
+unisex_data <- read_csv("unisex_names_table.csv")
+
+# Create a new longitudinal dataset from "unisex_data" 
+unisex_long <- unisex_data %>% pivot_longer(c(male_share, female_share), names_to = "gender", values_to = "shares")
+
+# Take only the first 40 observations (2 observations [male share and female share] for each of the 20 names)
+unisex_long_40 <- head(unisex_long, 40)
+
+# Relabel the categories for the "gender" column
+unisex_long_40 <- unisex_long_40 %>% 
+  mutate(gender = ifelse(gender == "male_share", "MALE SHARE", "FEMALE SHARE"))
+
+# Create the stacked bar chart
+plot <- ggplot(unisex_long_40, aes(y = reorder(name, total))) +
+  geom_bar(aes(x = shares, fill = factor(gender), group = factor(gender)), width = 0.75, position = "stack", stat = "identity", orientation = "y") +
+  geom_text(aes(x = shares, y = reorder(name, total), group = factor(gender), label = round(100*shares)), stat = "identity", orientation = "y", size = 2, hjust = 2, vjust = 0, position = "stack") +
+  scale_fill_manual(values = c("MALE SHARE" = "#008FD5", "FEMALE SHARE" = "#FFA500"), name = NULL) +
+  labs(title = "The Most Common Unisex Names in America", subtitle = "Names for which at least one-third of recipients were male and at \n least one-third were female, through 2013",
+       x = NULL,
+       y = NULL,
+       fill = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top", 
+        axis.text.y = element_text(size = 10, hjust = 0),
+        axis.title.y = element_text(angle = 0, vjust = 1),
+        axis.title.x = element_text(),
+        axis.ticks = element_blank(),
+        plot.title = element_text(hjust = 0, face = "bold")) +
+  guides(fill = guide_legend(reverse=TRUE))
+
+# Display the plot
+plot
+```
+
+
+Here is the original graph for comparison:
+
+![](original_graph.png)
+
+
+## Part 3 - Create a Publication Quality Table
+
+
+First, I used ChatGPT to help me try to re-create the original table in the article "The Most Common Unisex Names In America: Is Yours One Of Them?" on the FiveThirtyEight website.
+
+ChatGPT prompt:
+
+"Write R code that creates a professional, publication quality table with 14 rows and 5 columns. The first row is the header row with bold capitalized font and contains the following input: NAME, TOTAL, MALE SHARE, FEMALE SHARE, and GAP. The first row is separated from the rest of the table with a bold line. The second row has the following input: Bless; 280, 50.00%; 50.00%; and 0.01. The third row has the following input: Camdyn; 3,275; 49.99%, 50.01%, and 0.02. The fourth row has the following input: Kodee; 533; 50.02%; 49.98%; and 0.03." 
+
+
+```{r}
+# Load necessary libraries
+library(knitr)
+library(kableExtra)
+
+# Create the data frame
+data <- data.frame(
+  NAME = c("Bless", "Camdyn", "Kodee", "Callaway", "Tkai", "Nike", "Christian", "Kam", "Jonel", "Kris", "Myrl", "Daine", "Shaya"),
+  TOTAL = c(280, 3275, 533, 292, 143, 206, 2685, 729, 613, 24956, 869, 554, 1373),
+  MALE_SHARE = c("50.00%", "49.99%", "50.02%", "49.98%", "49.97%", "49.96%", "50.11%", "50.12%", "49.88%", "49.86%", "50.18%", "49.80%", "49.80%"),
+  FEMALE_SHARE = c("50.00%", "50.01%", "49.98%", "50.02%", "50.03%", "50.04%", "49.89%", "49.88%", "50.12%", "50.14%", "49.82%", "50.20%", "50.20%"),
+  GAP = c("0.01", "0.02", "0.03", "0.05", "0.06", "0.08", "0.23", "0.23", "0.24", "0.27", "0.37", "0.41", "0.41")
+)
+
+# Format the data frame
+data$MALE_SHARE <- paste0(data$MALE_SHARE, "%")
+data$FEMALE_SHARE <- paste0(data$FEMALE_SHARE, "%")
+
+# Create the table with bold header and separator line
+table <- data %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE)
+
+# Print the table
+table
+```
+
+
+Then I manually edited the code produced by ChatGPT to re-create the original table as close as possible.
+
+
+```{r}
+# Load necessary libraries
+library(knitr)
+library(kableExtra)
+
+# Create the data frame
+data <- data.frame(
+  NAME = c("Bless", "Camdyn", "Kodee", "Callaway", "Tkai", "Nike", "Christian", "Kam", "Jonel", "Kris", "Myrl", "Daine", "Shaya"),
+  TOTAL = c("280", "3,275", "533", "292", "143", "206", "2,685", "729", "613", "24,956", "869", "554", "1,373"),
+  "MALE SHARE" = c("50.00%", "49.99%", "50.02%", "49.98%", "49.97%", "49.96%", "50.11%", "50.12%", "49.88%", "49.86%", "50.18%", "49.80%", "49.80%"),
+  "FEMALE SHARE" = c("50.00%", "50.01%", "49.98%", "50.02%", "50.03%", "50.04%", "49.89%", "49.88%", "50.12%", "50.14%", "49.82%", "50.20%", "50.20%"),
+  GAP = c("0.01", "0.02", "0.03", "0.05", "0.06", "0.08", "0.23", "0.23", "0.24", "0.27", "0.37", "0.41", "0.41")
+)
+
+# Create the table with bold header and separator line
+table <- data %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE)
+
+# Print the table
+table
+```
+
+
+Here is the original table for comparison:
+
+![](original_table.png)
+
