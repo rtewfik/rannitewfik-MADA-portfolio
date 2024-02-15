@@ -2,7 +2,6 @@
 title: "CDC Data Exercise"
 ---
 
-
 ## Part 1 - About the Data
 
 The "NCHS - Leading Causes of Death: United States" dataset used for this exercise provides data on the age-adjusted death rates for the 10 leading causes of death in the U.S. (1999-2017). The source is the mortality data from the National Vital Statistics System (CDC/NCHS).
@@ -10,7 +9,6 @@ The "NCHS - Leading Causes of Death: United States" dataset used for this exerci
 Resident death certificates from all 50 states and D.C. were used to collect the data on demographic and medical characteristics. Age-adjusted death rates (per 100,000 population) are based on the 2000 U.S. standard population. Populations used for computing death rates after 2010 are postcensal estimates based on the 2010 census.
 
 The dataset has 10,868 observations and six variables: year, X113 cause name (specific cause of death), cause name (categorical cause of death), state, deaths, and age-adjusted death rate. To learn more about the data, please visit the [CDC](https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu/about_data) website.
-
 
 ## Part 2 - Processing the Data
 
@@ -43,9 +41,7 @@ str(cdc)
 summary(cdc)
 ```
 
-
 There are no weird symbols or missing values in the raw data. Because the variables for "X113 cause name" and "cause name" provide the same information, the variable for "X113 cause name" is removed from the processed data. The new dataset has 10,868 observations and five variables: year, cause name, state, deaths, and age-adjusted death rate.
-
 
 ## Part 3 - Exploring the Data
 
@@ -55,9 +51,7 @@ table(Year)
 prop.table(table(Year))
 ```
 
-
 19 years (1999-2017) are represented in the categorical variable "Year", each with 572 observations (5.3%).
-
 
 ```{r}
 #Summary tables for the categorical variable "Cause_Name"
@@ -65,9 +59,7 @@ table(Cause_Name)
 prop.table(table(Cause_Name))
 ```
 
-
 11 cause categories are represented in the categorical variable "Cause_Name", each with 988 observations (9.1%). The cause categories are "All causes", "Alzheimer's disease", "Cancer", "CLRD", "Diabetes", "Heart disease", "Influenza and pneumonia", "Kidney disease", "Stroke", "Suicide", and "Unintentional injuries".
-
 
 ```{r}
 #Summary tables for the categorical variable "State"
@@ -75,9 +67,7 @@ table(State)
 prop.table(table(State))
 ```
 
-
 52 states/districts are represented in the categorical variable "State", each with 209 observations (1.9%). All 50 states are represented, as well as "District of Columbia" and "United States".
-
 
 ```{r}
 #Summary statistics and histogram for the continuous variable "Deaths"
@@ -87,9 +77,7 @@ sd(Deaths)
 ggplot(cdc, aes(x = Deaths)) + geom_histogram(aes(y = after_stat(density), fill = "red"), bins = 50) + stat_function(fun = dnorm, args = with(cdc, c(mean = mean(Deaths), sd = sd(Deaths)))) + scale_x_continuous("Number of Deaths") + ggtitle("Histogram with Normal Curve")
 ```
 
-
 The histogram for the continuous variable "Deaths" does not show an approximately normal distribution. The mean is 15,460 deaths, and the standard deviation is 112,876 deaths.
-
 
 ```{r}
 #Summary statistics and histogram for the continuous variable "Age_Adjusted_Death_Rate"
@@ -99,6 +87,169 @@ sd(Age_Adjusted_Death_Rate)
 ggplot(cdc, aes(x = Age_Adjusted_Death_Rate)) + geom_histogram(aes(y = after_stat(density), fill = "red"), bins = 50) + stat_function(fun = dnorm, args = with(cdc, c(mean = mean(Age_Adjusted_Death_Rate), sd = sd(Age_Adjusted_Death_Rate)))) + scale_x_continuous("Age-Adjusted Death Rate") + ggtitle("Histogram with Normal Curve")
 ```
 
-
 The histogram for the continuous variable "Age_Adjusted_Death_Rate" does not show an approximately normal distribution. The mean is 127.6 deaths per 100,000 population, and the standard deviation is 223.6 deaths per 100,000 population.
 
+------------------------------------------------------------------------
+
+# This section contributed by Liza Hall
+# 
+
+## Synthetic Data
+
+To create a synthetic dataset based on the previous analysis, I provided a LLM AI tool (ChatGPT) the following information, so that it could generate some code to generate data based off of the numbers provided.
+
++----------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------+
+| 'Year'         | 'Age_Adjusted_Death_Rate' | 'Cause_Name"                                                                                                                                             | 'State'          | 'Deaths'        |
++================+===========================+==========================================================================================================================================================+==================+=================+
+| Min. : 1999    | Min.   :   2.6            | Length:10868                                                                                                                                             | Length:10868     | Min. : 21       |
+|                |                           |                                                                                                                                                          |                  |                 |
+| 1st Qu. : 2003 | 1st Qu.:  19.2            | Class :character                                                                                                                                         | Class :character | 1st Qu. : 612   |
+|                |                           |                                                                                                                                                          |                  |                 |
+| Median : 2008  | Median :  35.9            | Mode :character                                                                                                                                          | Mode :character  | Median : 1718   |
+|                |                           |                                                                                                                                                          |                  |                 |
+| Mean : 2008    | Mean   : 127.6            | Cause categories:                                                                                                                                        |                  | Mean : 15460    |
+|                |                           |                                                                                                                                                          |                  |                 |
+| 3rd Qu. : 2013 | 3rd Qu.: 151.7            | All causes, Alzheimer’s disease, Cancer, CLRD, Diabetes, Heart disease, Influenza and pneumonia, Kidney disease, Stroke, Suicide, Unintentional injuries |                  | 3rd Qu. : 5756  |
+|                |                           |                                                                                                                                                          |                  |                 |
+| Max. : 2017    | Max.   :1087.3            |                                                                                                                                                          |                  | Max. : 28135503 |
++----------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------+
+
+Based on what the AI generated I was able to edit and adjust as needed to get the following code:
+
+Loading the necessary libraries and setting a seed.
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Set seed for reproducibility
+set.seed(042)
+```
+
+Generating numerical values for synthetic dataset.
+
+```{r}
+# Define the number of observations
+num_obs <- 10000
+
+# Generate synthetic data for 'Year'
+year <- sample(1999:2017, num_obs, replace = TRUE)
+
+# Generate synthetic data for 'age_adjusted_death_rate'
+age_adjusted_death_rate <- rnorm(num_obs, mean = 127.6, sd = 150)
+
+# Ensure no negative values for death rates
+age_adjusted_death_rate <- pmax(age_adjusted_death_rate, 0)
+
+# Generate synthetic data for 'Deaths'
+deaths <- round(rnorm(num_obs, mean = 15460, sd = 10000))
+```
+
+Generating text values for synthetic dataset.
+
+```{r}
+# Generate synthetic data for 'Cause_Name'
+cause_name <- sample(c("All causes", "Alzheimer's disease", "Cancer", "CLRD", 
+                       "Diabetes", "Heart disease", "Influenza and pneumonia", 
+                       "Kidney disease", "Stroke", "Suicide", "Unintentional injuries"),
+                     num_obs, replace = TRUE)
+
+# Generate synthetic data for 'State'
+states <- c("Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", 
+            "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", 
+            "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+            "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", 
+            "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", 
+            "New Hampshire", "New Jersey", "New Mexico", "New York", 
+            "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", 
+            "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", 
+            "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", 
+            "West Virginia", "Wisconsin", "Wyoming")
+
+state <- sample(states, num_obs, replace = TRUE)
+```
+
+Finally, putting those values into the dataframe.
+
+```{r}
+# Create a data frame
+synthetic_data <- data.frame(Year = year,
+                             Age_Adjusted_Death_Rate = age_adjusted_death_rate,
+                             Cause_Name = cause_name,
+                             State = state,
+                             Deaths = deaths)
+```
+
+## Analyzing the Data
+
+Summary of synthetic dataset.
+
+```{r}
+# Display summary of synthetic data
+summary(synthetic_data)
+```
+
+Summary for the variable "year".
+
+```{r}
+#Summary tables for the categorical variable "year"
+table(year)
+```
+
+Summary for the variable "cause_name"
+
+```{r}
+#Summary tables for the categorical variable "cause_name"
+table(cause_name)
+```
+
+Summary for the variable "state".
+
+```{r}
+#Summary tables for the categorical variable "state"
+table(state)
+```
+
+Summary statistics and histogram for "death".
+
+```{r}
+#Summary statistics and histogram for the continuous variable "Deaths"
+summary(deaths)
+sd(deaths)
+
+
+ggplot(synthetic_data, aes(x = deaths)) + 
+  geom_histogram(aes(y = after_stat(density), 
+  fill = "red"), bins = 50) + 
+  stat_function(fun = dnorm, args = with(synthetic_data, 
+  c(mean = mean(deaths), sd = sd(deaths)))) + 
+  scale_x_continuous("Number of Deaths") + 
+  ggtitle("Histogram with Normal Curve")
+```
+
+The histogram displays a strong normal distribution. Which varies from what was found in the original dataset. I suspect that this is due to the randomized nature of the synthetic data, vs the real data which contains real-world biases and trends. 
+---
+
+Summary statistics and histogram for "age_adjusted_death_rate".
+
+```{r}
+#Summary statistics and histogram for the continuous variable "age_adjusted_death_rate"
+summary(age_adjusted_death_rate)
+sd(age_adjusted_death_rate)
+
+ggplot(synthetic_data, aes(x = age_adjusted_death_rate)) + 
+  geom_histogram(aes(y = after_stat(density),
+  fill = "red"), bins = 50) + 
+  stat_function(fun = dnorm, args = with(synthetic_data, 
+  c(mean = mean(age_adjusted_death_rate),
+  sd = sd(age_adjusted_death_rate)))) + 
+  scale_x_continuous("Age-Adjusted Death Rate") + 
+  ggtitle("Histogram with Normal Curve")
+```
+
+This histogram is closer in appearance to the one generated from the original dataset. It does not follow an approximately normal distribution, the mean is 143.95 and the standard deviation is 125.881 which while not exactly the same, is in the same sort of range as the original dataset. 
+
+## Final thoughts
+
+Overall I noticed that the synthetic dataset had more variation in values than the original. As stated previously I suspect that this is due to the random nature of the data generation within the synthetic dataset. Despite being based on statistics pulled from analysis of the original data, the syntehtic dataset does not have the nuances or biases of the original data. 
