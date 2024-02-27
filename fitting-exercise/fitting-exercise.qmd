@@ -1,0 +1,78 @@
+---
+title: "Fitting Exercise"
+---
+
+
+## Part 1 - Data Processing
+
+```{r}
+#Load the required packages
+library(dplyr)
+library(ggplot2)
+
+#Load the raw data
+mavoglurant <- read.csv("mavoglurant.csv")
+
+#Get an overview and summary of the raw data
+str(mavoglurant)
+summary(mavoglurant)
+
+#Plot DV as a function of TIME, stratified by DOSE and using ID as a grouping factor
+ggplot(mavoglurant, aes(x = TIME, y = DV, group = ID, color = factor(ID))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ DOSE) +
+  labs(x = "TIME", y = "DV", title = "DV vs. TIME, Stratified by DOSE and Grouped by ID")
+
+#Keep only observations with OCC = 1
+mavoglurant2 <- subset(mavoglurant, OCC == "1")
+
+#Remove TIME = 0 values for each individual
+No_TIME_0 <- subset(mavoglurant2, TIME != 0.000)
+
+#Create a subset data set with only ID and the sum of the DV variable for each individual; rename the DV variable to Y
+DV_sum <- aggregate(DV ~ ID, data = No_TIME_0, sum)
+names(DV_sum)[names(DV_sum) == "DV"] <- "Y"
+
+#Create a subset dataset that has TIME = 0
+TIME_0 <- subset(mavoglurant2, TIME == 0.000)
+
+#Combine the dataset without TIME = 0 with the dataset with only ID and Y
+mavoglurant3 <- merge(TIME_0, DV_sum, by = "ID")
+
+#Convert RACE and SEX to factor variables
+mavoglurant3$RACE <- as.factor(mavoglurant3$RACE)
+mavoglurant3$SEX <- as.factor(mavoglurant3$SEX)
+
+#Keep only the following variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, HT
+mavoglurant4 <- mavoglurant3[, c("Y", "DOSE", "RATE", "AGE", "SEX", "RACE", "WT", "HT")]
+
+#Get an overview and summary of the processed data
+str(mavoglurant4)
+summary(mavoglurant4)
+```
+
+
+## Part 2 - Data Exploration
+
+```{r}
+#Attach the processed data
+attach(mavoglurant4)
+
+#Summary statistics and histogram for the continuous variable Y (outcome)
+mavoglurant4$Y <- as.numeric(mavoglurant4$Y)
+summary(Y)
+
+ggplot(mavoglurant4, aes(x = Y)) +
+  geom_histogram() +
+  labs(x = "Total Drug, Y", y = "Frequency", title = "Histogram of Total Drug, Y")
+```
+
+
+
+```{r}
+#Summary tables for the categorical variable "Cause_Name"
+#table(Cause_Name)
+#prop.table(table(Cause_Name))
+```
+
