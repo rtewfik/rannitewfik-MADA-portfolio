@@ -14,6 +14,7 @@ Data on a drug candidate called Mavoglurant is available in this [GitHub](https:
 library(dplyr)
 library(ggplot2)
 library(gtsummary)
+library(tidymodels)
 
 #Load the raw data
 mavoglurant <- read.csv("mavoglurant.csv")
@@ -239,9 +240,21 @@ Finally, let's do some model fitting. First, let's fit a linear model to the out
 
 ```{r}
 #Fit a linear model to the outcome Y using DOSE as the predictor
-model1 <- lm(Y ~ DOSE, data = mavoglurant4)
-summary(model1)
-sqrt(mean(model1$residuals^2))
+model1 <- linear_reg() %>% fit(Y ~ DOSE, data = mavoglurant4)
+model1
+tidy(model1)
+
+#Compute RMSE
+augmented_model1 <- augment(model1, new_data = mavoglurant4)
+rmse <- sqrt(mean(augmented_model1$.resid^2))
+             
+#Compue R-squared
+predictions <- predict(model1, new_data = mavoglurant4)
+rsquared <- cor(mavoglurant4$Y, predictions)^2
+
+#Print RMSE and R-squared
+cat("RMSE:", rmse, "\n")
+cat("R-squared:", rsquared, "\n")
 ```
 
 
@@ -253,30 +266,83 @@ Now let's fit a linear model to the outcome, Y, using all other variables as the
 
 ```{r}
 #Fit a linear model to the outcome Y using all other variables as the predictors
-model2 <- lm(Y ~ DOSE + RATE + AGE + SEX + RACE + WT + HT, data = mavoglurant4)
-summary(model2)
-sqrt(mean(model2$residuals^2))
+model2 <- linear_reg() %>% fit(Y ~ DOSE + RATE + AGE + SEX + RACE + WT + HT, data = mavoglurant4)
+model2
+tidy(model2)
+
+#Compute RMSE
+augmented_model2 <- augment(model2, new_data = mavoglurant4)
+rmse <- sqrt(mean(augmented_model2$.resid^2))
+             
+#Compue R-squared
+predictions <- predict(model2, new_data = mavoglurant4)
+rsquared <- cor(mavoglurant4$Y, predictions)^2
+
+#Print RMSE and R-squared
+cat("RMSE:", rmse, "\n")
+cat("R-squared:", rsquared, "\n")
 ```
 
 
-In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.01) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 1.07e-13 units for every unit change in DOSE. R-squared = 1 indicates that 100% of the variability in total drug (Y) is explained by the model. RMSE = 4.22e-13 represents the average distance between the predicted values from the model and the actual values in the dataset.
+In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.01) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 1.07e-13 units for every unit change in DOSE. R-squared = 1 indicates that 100% of the variability in total drug (Y) is explained by the model. RMSE = 6.89e-13 represents the average distance between the predicted values from the model and the actual values in the dataset. 
+
+Both Model 1 and Model 2, DOSE is significantly associated with Y, which makes sense because we would expect an increase in total drug (Y) when increasing dose. The model with all predictors seems to be better than the model with just DOSE.
 
 
 Next let's fit a logistic model to the outcome, SEX, using DOSE as the predictor
 
 
 ```{r}
-model3 <- glm(SEX ~ DOSE, family = binomial(link = "logit"), data = mavoglurant4)
-summary(model3)
+#Fit a logistic model to the outcome SEX using DOSE as the predictor
+model3 <- logistic_reg() %>% fit(SEX ~ DOSE, data = mavoglurant4)
+model3
+tidy(model3)
+odds_ratio <- exp(tidy(model3)$estimate)
+print(odds_ratio)
+
+#Compute accuracy
+augmented_model3 <- augment(model3, new_data = mavoglurant4)
+accuracy <- accuracy(augmented_model3, truth = SEX, estimate = .pred_class)
+
+#Compute ROC-AUC
+roc.auc <- roc_auc(augmented_model3, SEX, .pred_1)
+
+#Print accuracy and ROC-AUC
+print(accuracy)
+print(roc.auc)
 ```
+
+
+In Model 3, the variable DOSE is not significantly associated with the outcome SEX (p-value = 0.19). The odds of the outcome for a dose is 0.97 times the odds of the outcome for a dose one unit less. The accuracy is 0.87, and the ROC-AUC is 0.59.
 
 
 Finally, let's fit a logistic model to the outcome, SEX, using all other variables as the predictors.
 
 
 ```{r}
-model4 <- glm(SEX ~ Y + DOSE + RATE + AGE + RACE + WT + HT, family = binomial(link = "logit"), data = mavoglurant4)
-summary(model4)
+#Fit a logistic model to the outcome SEX using all other variables as the predictors
+model4 <- logistic_reg() %>% fit(SEX ~ DOSE + Y + RATE + AGE + RACE + WT + HT, data = mavoglurant4)
+model4
+tidy(model4)
+odds_ratio <- exp(tidy(model4)$estimate)
+print(odds_ratio)
+
+#Compute accuracy
+augmented_model4 <- augment(model4, new_data = mavoglurant4)
+accuracy <- accuracy(augmented_model4, truth = SEX, estimate = .pred_class)
+
+#Compute ROC-AUC
+roc.auc <- roc_auc(augmented_model4, SEX, .pred_1)
+
+#Print accuracy and ROC-AUC
+print(accuracy)
+print(roc.auc)
 ```
+
+
+In Model 4, the variable DOSE is not significantly associated with the outcome SEX (p-value = 0.996) when the other predictors are included in the model. Adjusting for the other variables, the odds of the outcome for a dose is 0.43 times the odds of the outcome for a dose one unit less. The accuracy is 0.94, and the ROC-AUC is 0.98.
+
+Both Model 3 and Model 4, DOSE is not significantly associated with SEX, which makes sense because we would not necessarily expect a relationship between those two variables. The model with all predictors is more accurate than the model with just DOSE.
+
 
 
