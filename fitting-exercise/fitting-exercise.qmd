@@ -5,10 +5,15 @@ title: "Fitting Exercise"
 
 ## Part 1 - Data Processing
 
+
+Data on a drug candidate called Mavoglurant is available in this [GitHub](https://github.com/metrumresearchgroup/BayesPBPK-tutorial) repository. First, let's process the raw data to make it ready for data exploration and analysis.
+
+
 ```{r}
 #Load the required packages
 library(dplyr)
 library(ggplot2)
+library(gtsummary)
 
 #Load the raw data
 mavoglurant <- read.csv("mavoglurant.csv")
@@ -27,24 +32,23 @@ ggplot(mavoglurant, aes(x = TIME, y = DV, group = ID, color = factor(ID))) +
 #Keep only observations with OCC = 1
 mavoglurant2 <- subset(mavoglurant, OCC == "1")
 
-#Remove TIME = 0 values for each individual
+#Use the dataset with OCC = 1 to create a subset dataset that removes TIME = 0 values for each individual
 No_TIME_0 <- subset(mavoglurant2, TIME != 0.000)
 
-#Create a subset data set with only ID and the sum of the DV variable for each individual; rename the DV variable to Y
-DV_sum <- aggregate(DV ~ ID, data = No_TIME_0, sum)
-names(DV_sum)[names(DV_sum) == "DV"] <- "Y"
+#Use the dataset without TIME = 0  to create a new dataset that groups by ID to create a new variable Y that is the sum of the DV variable for each individual
+DV_sum <- No_TIME_0 %>% group_by(ID) %>% summarize(Y = sum(DV))
 
-#Create a subset dataset that has TIME = 0
+#Use the dataset with OCC = 1 to create a subset dataset that has only TIME = 0
 TIME_0 <- subset(mavoglurant2, TIME == 0.000)
 
 #Combine the dataset without TIME = 0 with the dataset with only ID and Y
 mavoglurant3 <- merge(TIME_0, DV_sum, by = "ID")
 
-#Convert RACE and SEX to factor variables
+#Convert RACE and SEX to factor variables in the combined dataset
 mavoglurant3$RACE <- as.factor(mavoglurant3$RACE)
 mavoglurant3$SEX <- as.factor(mavoglurant3$SEX)
 
-#Keep only the following variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, HT
+#Use the combined dataset and keep only the following variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, HT
 mavoglurant4 <- mavoglurant3[, c("Y", "DOSE", "RATE", "AGE", "SEX", "RACE", "WT", "HT")]
 
 #Get an overview and summary of the processed data
@@ -53,13 +57,20 @@ summary(mavoglurant4)
 ```
 
 
+The processed dataset has 120 observations and 8 variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, and HT.
+
+
 ## Part 2 - Data Exploration
+
+
+Now let's explore each variable in the processed dataset, starting with the outcome variable, Y.
+
 
 ```{r}
 #Attach the processed data
 attach(mavoglurant4)
 
-#Summary statistics and histogram for the continuous variable Y (outcome)
+#Summary statistics and histogram for the outcome variable Y
 mavoglurant4$Y <- as.numeric(mavoglurant4$Y)
 summary(Y)
 
@@ -69,10 +80,203 @@ ggplot(mavoglurant4, aes(x = Y)) +
 ```
 
 
+The mean and median for the outcome variable (total drug, Y) are the same (854). The histogram of Y shows a relatively normal distribution for most of the data (Y < 4000). There are a few observations for Y > 4000.
+
+
+Now let's explore the variable DOSE.
+
 
 ```{r}
-#Summary tables for the categorical variable "Cause_Name"
-#table(Cause_Name)
-#prop.table(table(Cause_Name))
+#Summary tables for the variable DOSE
+table(DOSE, useNA = "always")
+prop.table(table(DOSE))
 ```
+
+
+For the variable DOSE, 49.2% of the observations are "25", 10.0% are "37.5", and 40.8% are "50". There are no missing observations for DOSE.
+
+
+Now let's explore the variable RATE.
+
+
+```{r}
+#Summary tables for the variable RATE
+table(RATE, useNA = "always")
+prop.table(table(RATE))
+```
+
+
+For the variable RATE, 0.8% of the observations are "75", 48.3% are "150", 10.0% are "225", and 40.8% are "300". There are no missing observations for RATE.
+
+
+Now let's explore the variable AGE.
+
+
+```{r}
+#Summary statistics and histogram for the variable AGE
+mavoglurant4$AGE <- as.numeric(mavoglurant4$AGE)
+summary(AGE)
+
+ggplot(mavoglurant4, aes(x = AGE)) +
+  geom_histogram() +
+  labs(x = "Age", y = "Frequency", title = "Histogram of Age")
+```
+
+
+The mean (33) and median (31) for the variable AGE are similar. The histogram of AGE shows a relatively normal distribution for most of the data (AGE < 4000). There are a few observations for AGE > 4000.
+
+
+Now let's explore the variable SEX.
+
+
+```{r}
+#Summary tables for the variable SEX
+table(SEX, useNA = "always")
+prop.table(table(SEX))
+```
+
+
+For the variable SEX, 86.7% of the observations are "1", and 13.3% are "2". There are no missing observations for SEX.
+
+
+Now let's explore the variable RACE
+
+
+```{r}
+#Summary tables for the variable RACE
+table(RACE, useNA = "always")
+prop.table(table(RACE))
+```
+
+
+For the variable RACE, 61.7% of the observations are "1", 30.0% are "2", 1.7% are "7", and 6.7% are "88". There are no missing observations for RACE, although "88" may represent missing/unknown.
+
+
+Now let's explore the variable WT.
+
+
+```{r}
+#Summary statistics and histogram for the variable WT
+mavoglurant4$WT <- as.numeric(mavoglurant4$WT)
+summary(WT)
+
+ggplot(mavoglurant4, aes(x = WT)) +
+  geom_histogram() +
+  labs(x = "Weight", y = "Frequency", title = "Histogram of Weight")
+```
+
+
+The mean (83) and median (82) for the variable WT are similar. The histogram of WT shows a relatively normal distribution for the entire data.
+
+
+Now let's explore the variable HT.
+
+
+```{r}
+#Summary statistics and histogram for the variable HT
+mavoglurant4$HT <- as.numeric(mavoglurant4$HT)
+summary(HT)
+
+ggplot(mavoglurant4, aes(x = HT)) +
+  geom_histogram() +
+  labs(x = "Height", y = "Frequency", title = "Histogram of Height")
+```
+
+
+The mean and median for the variable HT are the same (1.8). The histogram of HT shows a left-skewing distribution.
+
+
+Here is a summary table of the outcome and predictors, stratified by dose.
+
+
+```{r}
+#Create a summary table of the variables
+mavoglurant4 %>% tbl_summary(by = DOSE, statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
+  modify_caption("Summary Table of Mavoglurant Data, Stratified by Dose")
+```
+
+
+Finally, let's create some scatterplots between the main outcome (total drug, Y) and the continuous predictors, as well as a correlation table.
+
+
+```{r}
+#Create scatterplots between Y and the continuous predictors
+pairs(cbind(Y, AGE, WT, HT))
+
+#Create a correlation matrix  of the continuous variables
+cor(cbind(Y, AGE, WT, HT))
+
+#Create a boxplot of DOSE and Y
+ggplot(mavoglurant4, aes(x = factor(DOSE), y = Y)) +
+  geom_boxplot() +
+  labs(x = "Dose", y = "Drug Total", title = "Boxplot of Dose and Total Drug")
+
+#Create a boxplot of RATE and Y
+ggplot(mavoglurant4, aes(x = factor(RATE), y = Y)) +
+  geom_boxplot() +
+  labs(x = "Rate", y = "Drug Total", title = "Boxplot of Rate and Total Drug")
+
+#Create a boxplot of SEX and Y
+ggplot(mavoglurant4, aes(x = factor(SEX), y = Y)) +
+  geom_boxplot() +
+  labs(x = "Sex", y = "Drug Total", title = "Boxplot of Sex and Total Drug")
+
+#Create a boxplot of RACE and Y
+ggplot(mavoglurant4, aes(x = factor(RACE), y = Y)) +
+  geom_boxplot() +
+  labs(x = "Race", y = "Drug Total", title = "Boxplot of Race and Total Drug")
+```
+
+
+Based on the scatterplots and the correlation matrix, there doesn't seem to be a strong correlation between the outcome (total drug, Y) and any of the continuous predictors. The boxplots of total drug, Y, and the categorical variables shows a relatively normal distribution.
+
+
+## Part 3 - Model Fitting
+
+
+Finally, let's do some model fitting. First, let's fit a linear model to the outcome, Y, using DOSE as the predictor.
+
+
+```{r}
+#Fit a linear model to the outcome Y using DOSE as the predictor
+model1 <- lm(Y ~ DOSE, data = mavoglurant4)
+summary(model1)
+sqrt(mean(model1$residuals^2))
+```
+
+
+In Model 1, the variable DOSE is significantly associated with the outcome Y (p-value < 0.001). The total drug (Y) increases by 58.21 units for every unit change in DOSE. R-squared = 0.5156 indicates that 51.56% of the variability in total drug (Y) is explained by the model. RMSE = 666.46 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+Now let's fit a linear model to the outcome, Y, using all other variables as the predictors.
+
+
+```{r}
+#Fit a linear model to the outcome Y using all other variables as the predictors
+model2 <- lm(Y ~ DOSE + RATE + AGE + SEX + RACE + WT + HT, data = mavoglurant4)
+summary(model2)
+sqrt(mean(model2$residuals^2))
+```
+
+
+In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.01) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 1.07e-13 units for every unit change in DOSE. R-squared = 1 indicates that 100% of the variability in total drug (Y) is explained by the model. RMSE = 4.22e-13 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+Next let's fit a logistic model to the outcome, SEX, using DOSE as the predictor
+
+
+```{r}
+model3 <- glm(SEX ~ DOSE, family = binomial(link = "logit"), data = mavoglurant4)
+summary(model3)
+```
+
+
+Finally, let's fit a logistic model to the outcome, SEX, using all other variables as the predictors.
+
+
+```{r}
+model4 <- glm(SEX ~ Y + DOSE + RATE + AGE + RACE + WT + HT, family = binomial(link = "logit"), data = mavoglurant4)
+summary(model4)
+```
+
 

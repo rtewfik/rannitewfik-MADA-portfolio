@@ -204,6 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="part-1---data-processing" class="level2">
 <h2 class="anchored" data-anchor-id="part-1---data-processing">Part 1 - Data Processing</h2>
+<p>Data on a drug candidate called Mavoglurant is available in this <a href="https://github.com/metrumresearchgroup/BayesPBPK-tutorial">GitHub</a> repository. First, let’s process the raw data to make it ready for data exploration and analysis.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load the required packages</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -228,11 +229,15 @@ Attaching package: 'dplyr'</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'ggplot2' was built under R version 4.3.2</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load the raw data</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mavoglurant <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"mavoglurant.csv"</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Get an overview and summary of the raw data</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(mavoglurant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'gtsummary' was built under R version 4.3.2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load the raw data</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mavoglurant <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"mavoglurant.csv"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Get an overview and summary of the raw data</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(mavoglurant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   2678 obs. of  17 variables:
  $ ID  : int  793 793 793 793 793 793 793 793 793 793 ...
@@ -253,7 +258,7 @@ Attaching package: 'dplyr'</code></pre>
  $ WT  : num  94.3 94.3 94.3 94.3 94.3 94.3 94.3 94.3 94.3 94.3 ...
  $ HT  : num  1.77 1.77 1.77 1.77 1.77 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mavoglurant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mavoglurant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       ID             CMT             EVID              EVI2       
  Min.   :793.0   Min.   :1.000   Min.   :0.00000   Min.   :0.0000  
@@ -291,12 +296,12 @@ Attaching package: 'dplyr'</code></pre>
  3rd Qu.:1.820  
  Max.   :1.930  </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot DV as a function of TIME, stratified by DOSE and using ID as a grouping factor</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant, <span class="fu">aes</span>(<span class="at">x =</span> TIME, <span class="at">y =</span> DV, <span class="at">group =</span> ID, <span class="at">color =</span> <span class="fu">factor</span>(ID))) <span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> DOSE) <span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"TIME"</span>, <span class="at">y =</span> <span class="st">"DV"</span>, <span class="at">title =</span> <span class="st">"DV vs. TIME, Stratified by DOSE and Grouped by ID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot DV as a function of TIME, stratified by DOSE and using ID as a grouping factor</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant, <span class="fu">aes</span>(<span class="at">x =</span> TIME, <span class="at">y =</span> DV, <span class="at">group =</span> ID, <span class="at">color =</span> <span class="fu">factor</span>(ID))) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> DOSE) <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"TIME"</span>, <span class="at">y =</span> <span class="st">"DV"</span>, <span class="at">title =</span> <span class="st">"DV vs. TIME, Stratified by DOSE and Grouped by ID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -304,31 +309,30 @@ Attaching package: 'dplyr'</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only observations with OCC = 1</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>mavoglurant2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant, OCC <span class="sc">==</span> <span class="st">"1"</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove TIME = 0 values for each individual</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>No_TIME_0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant2, TIME <span class="sc">!=</span> <span class="fl">0.000</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a subset data set with only ID and the sum of the DV variable for each individual; rename the DV variable to Y</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>DV_sum <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(DV <span class="sc">~</span> ID, <span class="at">data =</span> No_TIME_0, sum)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(DV_sum)[<span class="fu">names</span>(DV_sum) <span class="sc">==</span> <span class="st">"DV"</span>] <span class="ot">&lt;-</span> <span class="st">"Y"</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a subset dataset that has TIME = 0</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>TIME_0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant2, TIME <span class="sc">==</span> <span class="fl">0.000</span>)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#Combine the dataset without TIME = 0 with the dataset with only ID and Y</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>mavoglurant3 <span class="ot">&lt;-</span> <span class="fu">merge</span>(TIME_0, DV_sum, <span class="at">by =</span> <span class="st">"ID"</span>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Convert RACE and SEX to factor variables</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>mavoglurant3<span class="sc">$</span>RACE <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(mavoglurant3<span class="sc">$</span>RACE)</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>mavoglurant3<span class="sc">$</span>SEX <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(mavoglurant3<span class="sc">$</span>SEX)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only the following variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, HT</span></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>mavoglurant4 <span class="ot">&lt;-</span> mavoglurant3[, <span class="fu">c</span>(<span class="st">"Y"</span>, <span class="st">"DOSE"</span>, <span class="st">"RATE"</span>, <span class="st">"AGE"</span>, <span class="st">"SEX"</span>, <span class="st">"RACE"</span>, <span class="st">"WT"</span>, <span class="st">"HT"</span>)]</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">#Get an overview and summary of the processed data</span></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(mavoglurant4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only observations with OCC = 1</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>mavoglurant2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant, OCC <span class="sc">==</span> <span class="st">"1"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the dataset with OCC = 1 to create a subset dataset that removes TIME = 0 values for each individual</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>No_TIME_0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant2, TIME <span class="sc">!=</span> <span class="fl">0.000</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the dataset without TIME = 0  to create a new dataset that groups by ID to create a new variable Y that is the sum of the DV variable for each individual</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>DV_sum <span class="ot">&lt;-</span> No_TIME_0 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(ID) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">Y =</span> <span class="fu">sum</span>(DV))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the dataset with OCC = 1 to create a subset dataset that has only TIME = 0</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>TIME_0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(mavoglurant2, TIME <span class="sc">==</span> <span class="fl">0.000</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#Combine the dataset without TIME = 0 with the dataset with only ID and Y</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>mavoglurant3 <span class="ot">&lt;-</span> <span class="fu">merge</span>(TIME_0, DV_sum, <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#Convert RACE and SEX to factor variables in the combined dataset</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>mavoglurant3<span class="sc">$</span>RACE <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(mavoglurant3<span class="sc">$</span>RACE)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>mavoglurant3<span class="sc">$</span>SEX <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(mavoglurant3<span class="sc">$</span>SEX)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the combined dataset and keep only the following variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, HT</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>mavoglurant4 <span class="ot">&lt;-</span> mavoglurant3[, <span class="fu">c</span>(<span class="st">"Y"</span>, <span class="st">"DOSE"</span>, <span class="st">"RATE"</span>, <span class="st">"AGE"</span>, <span class="st">"SEX"</span>, <span class="st">"RACE"</span>, <span class="st">"WT"</span>, <span class="st">"HT"</span>)]</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co">#Get an overview and summary of the processed data</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(mavoglurant4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   120 obs. of  8 variables:
  $ Y   : num  2691 2639 2150 1789 3126 ...
@@ -340,7 +344,7 @@ Attaching package: 'dplyr'</code></pre>
  $ WT  : num  94.3 80.4 71.8 77.4 64.3 ...
  $ HT  : num  1.77 1.76 1.81 1.65 1.56 ...</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mavoglurant4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mavoglurant4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Y               DOSE            RATE            AGE        SEX    
  Min.   : 826.4   Min.   :25.00   Min.   : 75.0   Min.   :18.00   1:104  
@@ -358,23 +362,25 @@ Attaching package: 'dplyr'</code></pre>
          Max.   :115.30   Max.   :1.930  </code></pre>
 </div>
 </div>
+<p>The processed dataset has 120 observations and 8 variables: Y, DOSE, RATE, AGE, SEX, RACE, WT, and HT.</p>
 </section>
 <section id="part-2---data-exploration" class="level2">
 <h2 class="anchored" data-anchor-id="part-2---data-exploration">Part 2 - Data Exploration</h2>
+<p>Now let’s explore each variable in the processed dataset, starting with the outcome variable, Y.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Attach the processed data</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(mavoglurant4)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary statistics and histogram for the continuous variable Y (outcome)</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>mavoglurant4<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mavoglurant4<span class="sc">$</span>Y)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Attach the processed data</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(mavoglurant4)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary statistics and histogram for the outcome variable Y</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>mavoglurant4<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mavoglurant4<span class="sc">$</span>Y)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   826.4  1700.5  2349.1  2445.4  3050.2  5606.6 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> Y)) <span class="sc">+</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Total Drug, Y"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">title =</span> <span class="st">"Histogram of Total Drug, Y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> Y)) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Total Drug, Y"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">title =</span> <span class="st">"Histogram of Total Drug, Y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 </div>
@@ -386,10 +392,929 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 </div>
 </div>
+<p>The mean and median for the outcome variable (total drug, Y) are the same (854). The histogram of Y shows a relatively normal distribution for most of the data (Y &lt; 4000). There are a few observations for Y &gt; 4000.</p>
+<p>Now let’s explore the variable DOSE.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary tables for the categorical variable "Cause_Name"</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#table(Cause_Name)</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#prop.table(table(Cause_Name))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary tables for the variable DOSE</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(DOSE, <span class="at">useNA =</span> <span class="st">"always"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DOSE
+  25 37.5   50 &lt;NA&gt; 
+  59   12   49    0 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(DOSE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DOSE
+       25      37.5        50 
+0.4916667 0.1000000 0.4083333 </code></pre>
+</div>
+</div>
+<p>For the variable DOSE, 49.2% of the observations are “25”, 10.0% are “37.5”, and 40.8% are “50”. There are no missing observations for DOSE.</p>
+<p>Now let’s explore the variable RATE.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary tables for the variable RATE</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(RATE, <span class="at">useNA =</span> <span class="st">"always"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RATE
+  75  150  225  300 &lt;NA&gt; 
+   1   58   12   49    0 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(RATE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RATE
+         75         150         225         300 
+0.008333333 0.483333333 0.100000000 0.408333333 </code></pre>
+</div>
+</div>
+<p>For the variable RATE, 0.8% of the observations are “75”, 48.3% are “150”, 10.0% are “225”, and 40.8% are “300”. There are no missing observations for RATE.</p>
+<p>Now let’s explore the variable AGE.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary statistics and histogram for the variable AGE</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>mavoglurant4<span class="sc">$</span>AGE <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mavoglurant4<span class="sc">$</span>AGE)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(AGE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  18.00   26.00   31.00   33.00   40.25   50.00 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> AGE)) <span class="sc">+</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">title =</span> <span class="st">"Histogram of Age"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The mean (33) and median (31) for the variable AGE are similar. The histogram of AGE shows a relatively normal distribution for most of the data (AGE &lt; 4000). There are a few observations for AGE &gt; 4000.</p>
+<p>Now let’s explore the variable SEX.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary tables for the variable SEX</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(SEX, <span class="at">useNA =</span> <span class="st">"always"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SEX
+   1    2 &lt;NA&gt; 
+ 104   16    0 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(SEX))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SEX
+        1         2 
+0.8666667 0.1333333 </code></pre>
+</div>
+</div>
+<p>For the variable SEX, 86.7% of the observations are “1”, and 13.3% are “2”. There are no missing observations for SEX.</p>
+<p>Now let’s explore the variable RACE</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary tables for the variable RACE</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(RACE, <span class="at">useNA =</span> <span class="st">"always"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RACE
+   1    2    7   88 &lt;NA&gt; 
+  74   36    2    8    0 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(RACE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RACE
+         1          2          7         88 
+0.61666667 0.30000000 0.01666667 0.06666667 </code></pre>
+</div>
+</div>
+<p>For the variable RACE, 61.7% of the observations are “1”, 30.0% are “2”, 1.7% are “7”, and 6.7% are “88”. There are no missing observations for RACE, although “88” may represent missing/unknown.</p>
+<p>Now let’s explore the variable WT.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary statistics and histogram for the variable WT</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>mavoglurant4<span class="sc">$</span>WT <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mavoglurant4<span class="sc">$</span>WT)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(WT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  56.60   73.17   82.10   82.55   90.10  115.30 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> WT)) <span class="sc">+</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Weight"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">title =</span> <span class="st">"Histogram of Weight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The mean (83) and median (82) for the variable WT are similar. The histogram of WT shows a relatively normal distribution for the entire data.</p>
+<p>Now let’s explore the variable HT.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary statistics and histogram for the variable HT</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>mavoglurant4<span class="sc">$</span>HT <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mavoglurant4<span class="sc">$</span>HT)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(HT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.520   1.700   1.770   1.759   1.813   1.930 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> HT)) <span class="sc">+</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Height"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">title =</span> <span class="st">"Histogram of Height"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The mean and median for the variable HT are the same (1.8). The histogram of HT shows a left-skewing distribution.</p>
+<p>Here is a summary table of the outcome and predictors, stratified by dose.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a summary table of the variables</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>mavoglurant4 <span class="sc">%&gt;%</span> <span class="fu">tbl_summary</span>(<span class="at">by =</span> DOSE, <span class="at">statistic =</span> <span class="fu">list</span>(<span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">"{mean} ({sd})"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modify_caption</span>(<span class="st">"Summary Table of Mavoglurant Data, Stratified by Dose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="yayoxaigol" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#yayoxaigol table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#yayoxaigol thead, #yayoxaigol tbody, #yayoxaigol tfoot, #yayoxaigol tr, #yayoxaigol td, #yayoxaigol th {
+  border-style: none;
+}
+
+#yayoxaigol p {
+  margin: 0;
+  padding: 0;
+}
+
+#yayoxaigol .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#yayoxaigol .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#yayoxaigol .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#yayoxaigol .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#yayoxaigol .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#yayoxaigol .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#yayoxaigol .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#yayoxaigol .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#yayoxaigol .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#yayoxaigol .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#yayoxaigol .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#yayoxaigol .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#yayoxaigol .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#yayoxaigol .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#yayoxaigol .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yayoxaigol .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#yayoxaigol .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#yayoxaigol .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#yayoxaigol .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yayoxaigol .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#yayoxaigol .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yayoxaigol .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#yayoxaigol .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yayoxaigol .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yayoxaigol .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yayoxaigol .gt_left {
+  text-align: left;
+}
+
+#yayoxaigol .gt_center {
+  text-align: center;
+}
+
+#yayoxaigol .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#yayoxaigol .gt_font_normal {
+  font-weight: normal;
+}
+
+#yayoxaigol .gt_font_bold {
+  font-weight: bold;
+}
+
+#yayoxaigol .gt_font_italic {
+  font-style: italic;
+}
+
+#yayoxaigol .gt_super {
+  font-size: 65%;
+}
+
+#yayoxaigol .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#yayoxaigol .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#yayoxaigol .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#yayoxaigol .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#yayoxaigol .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#yayoxaigol .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#yayoxaigol .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+
+<table class="gt_table table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<caption>Summary Table of Mavoglurant Data, Stratified by Dose</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header gt_col_headings">
+<th id="<strong>Characteristic</strong>" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
+<th id="<strong>25</strong>, N = 59<span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>25</strong>, N = 59<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+<th id="<strong>37.5</strong>, N = 12<span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>37.5</strong>, N = 12<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+<th id="<strong>50</strong>, N = 49<span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>50</strong>, N = 49<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Y</td>
+<td class="gt_row gt_center" headers="stat_1">1,783 (601)</td>
+<td class="gt_row gt_center" headers="stat_2">2,464 (488)</td>
+<td class="gt_row gt_center" headers="stat_3">3,239 (787)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">RATE</td>
+<td class="gt_row gt_center" headers="stat_1"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_2"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_3"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;75</td>
+<td class="gt_row gt_center" headers="stat_1">1 (1.7%)</td>
+<td class="gt_row gt_center" headers="stat_2">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_3">0 (0%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;150</td>
+<td class="gt_row gt_center" headers="stat_1">58 (98%)</td>
+<td class="gt_row gt_center" headers="stat_2">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_3">0 (0%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;225</td>
+<td class="gt_row gt_center" headers="stat_1">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_2">12 (100%)</td>
+<td class="gt_row gt_center" headers="stat_3">0 (0%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;300</td>
+<td class="gt_row gt_center" headers="stat_1">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_2">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_3">49 (100%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">AGE</td>
+<td class="gt_row gt_center" headers="stat_1">32 (9)</td>
+<td class="gt_row gt_center" headers="stat_2">36 (10)</td>
+<td class="gt_row gt_center" headers="stat_3">33 (9)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">SEX</td>
+<td class="gt_row gt_center" headers="stat_1"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_2"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_3"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td class="gt_row gt_center" headers="stat_1">49 (83%)</td>
+<td class="gt_row gt_center" headers="stat_2">10 (83%)</td>
+<td class="gt_row gt_center" headers="stat_3">45 (92%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td class="gt_row gt_center" headers="stat_1">10 (17%)</td>
+<td class="gt_row gt_center" headers="stat_2">2 (17%)</td>
+<td class="gt_row gt_center" headers="stat_3">4 (8.2%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">RACE</td>
+<td class="gt_row gt_center" headers="stat_1"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_2"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_3"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td class="gt_row gt_center" headers="stat_1">32 (54%)</td>
+<td class="gt_row gt_center" headers="stat_2">10 (83%)</td>
+<td class="gt_row gt_center" headers="stat_3">32 (65%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td class="gt_row gt_center" headers="stat_1">21 (36%)</td>
+<td class="gt_row gt_center" headers="stat_2">2 (17%)</td>
+<td class="gt_row gt_center" headers="stat_3">13 (27%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;7</td>
+<td class="gt_row gt_center" headers="stat_1">1 (1.7%)</td>
+<td class="gt_row gt_center" headers="stat_2">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_3">1 (2.0%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;88</td>
+<td class="gt_row gt_center" headers="stat_1">5 (8.5%)</td>
+<td class="gt_row gt_center" headers="stat_2">0 (0%)</td>
+<td class="gt_row gt_center" headers="stat_3">3 (6.1%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">WT</td>
+<td class="gt_row gt_center" headers="stat_1">81 (12)</td>
+<td class="gt_row gt_center" headers="stat_2">81 (11)</td>
+<td class="gt_row gt_center" headers="stat_3">84 (13)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">HT</td>
+<td class="gt_row gt_center" headers="stat_1">1.76 (0.09)</td>
+<td class="gt_row gt_center" headers="stat_2">1.75 (0.10)</td>
+<td class="gt_row gt_center" headers="stat_3">1.76 (0.08)</td>
+</tr>
+</tbody><tfoot class="gt_footnotes">
+<tr class="even">
+<td colspan="4" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> Mean (SD); n (%)</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+<p>Finally, let’s create some scatterplots between the main outcome (total drug, Y) and the continuous predictors, as well as a correlation table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create scatterplots between Y and the continuous predictors</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(<span class="fu">cbind</span>(Y, AGE, WT, HT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a correlation matrix  of the continuous variables</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">cbind</span>(Y, AGE, WT, HT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Y         AGE         WT         HT
+Y    1.00000000  0.01256372 -0.2128719 -0.1583297
+AGE  0.01256372  1.00000000  0.1196740 -0.3518581
+WT  -0.21287194  0.11967399  1.0000000  0.5997505
+HT  -0.15832972 -0.35185806  0.5997505  1.0000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a boxplot of DOSE and Y</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(DOSE), <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Dose"</span>, <span class="at">y =</span> <span class="st">"Drug Total"</span>, <span class="at">title =</span> <span class="st">"Boxplot of Dose and Total Drug"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a boxplot of RATE and Y</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(RATE), <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Rate"</span>, <span class="at">y =</span> <span class="st">"Drug Total"</span>, <span class="at">title =</span> <span class="st">"Boxplot of Rate and Total Drug"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a boxplot of SEX and Y</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(SEX), <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Sex"</span>, <span class="at">y =</span> <span class="st">"Drug Total"</span>, <span class="at">title =</span> <span class="st">"Boxplot of Sex and Total Drug"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-11-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a boxplot of RACE and Y</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mavoglurant4, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(RACE), <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Race"</span>, <span class="at">y =</span> <span class="st">"Drug Total"</span>, <span class="at">title =</span> <span class="st">"Boxplot of Race and Total Drug"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-11-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on the scatterplots and the correlation matrix, there doesn’t seem to be a strong correlation between the outcome (total drug, Y) and any of the continuous predictors. The boxplots of total drug, Y, and the categorical variables shows a relatively normal distribution.</p>
+</section>
+<section id="part-3---model-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="part-3---model-fitting">Part 3 - Model Fitting</h2>
+<p>Finally, let’s do some model fitting. First, let’s fit a linear model to the outcome, Y, using DOSE as the predictor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit a linear model to the outcome Y using DOSE as the predictor</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> DOSE, <span class="at">data =</span> mavoglurant4)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ DOSE, data = mavoglurant4)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1284.91  -441.14   -97.22   325.84  2372.87 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  323.062    199.049   1.623    0.107    
+DOSE          58.213      5.194  11.208   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 672.1 on 118 degrees of freedom
+Multiple R-squared:  0.5156,    Adjusted R-squared:  0.5115 
+F-statistic: 125.6 on 1 and 118 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(model1<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 666.4618</code></pre>
+</div>
+</div>
+<p>In Model 1, the variable DOSE is significantly associated with the outcome Y (p-value &lt; 0.001). The total drug (Y) increases by 58.21 units for every unit change in DOSE. R-squared = 0.5156 indicates that 51.56% of the variability in total drug (Y) is explained by the model. RMSE = 666.46 represents the average distance between the predicted values from the model and the actual values in the dataset.</p>
+<p>Now let’s fit a linear model to the outcome, Y, using all other variables as the predictors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit a linear model to the outcome Y using all other variables as the predictors</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> DOSE <span class="sc">+</span> RATE <span class="sc">+</span> AGE <span class="sc">+</span> SEX <span class="sc">+</span> RACE <span class="sc">+</span> WT <span class="sc">+</span> HT, <span class="at">data =</span> mavoglurant4)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ DOSE + RATE + AGE + SEX + RACE + WT + HT, data = mavoglurant4)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1487.21  -351.61   -52.84   267.05  2418.26 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 3399.953   1819.271   1.869 0.064303 .  
+DOSE         146.875     50.862   2.888 0.004673 ** 
+RATE         -14.354      8.359  -1.717 0.088771 .  
+AGE            1.777      7.798   0.228 0.820141    
+SEX2        -338.677    215.335  -1.573 0.118640    
+RACE2        125.041    128.703   0.972 0.333410    
+RACE7       -398.432    444.324  -0.897 0.371830    
+RACE88       -69.065    242.717  -0.285 0.776525    
+WT           -23.704      6.351  -3.732 0.000302 ***
+HT          -717.053   1094.568  -0.655 0.513770    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 609 on 110 degrees of freedom
+Multiple R-squared:  0.6292,    Adjusted R-squared:  0.5989 
+F-statistic: 20.74 on 9 and 110 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(model2<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 583.0904</code></pre>
+</div>
+</div>
+<p>In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.01) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 1.07e-13 units for every unit change in DOSE. R-squared = 1 indicates that 100% of the variability in total drug (Y) is explained by the model. RMSE = 4.22e-13 represents the average distance between the predicted values from the model and the actual values in the dataset.</p>
+<p>Next let’s fit a logistic model to the outcome, SEX, using DOSE as the predictor</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>model3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(SEX <span class="sc">~</span> DOSE, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>), <span class="at">data =</span> mavoglurant4)</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = SEX ~ DOSE, family = binomial(link = "logit"), 
+    data = mavoglurant4)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)
+(Intercept) -0.76482    0.85395  -0.896    0.370
+DOSE        -0.03175    0.02432  -1.306    0.192
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 94.242  on 119  degrees of freedom
+Residual deviance: 92.431  on 118  degrees of freedom
+AIC: 96.431
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>Finally, let’s fit a logistic model to the outcome, SEX, using all other variables as the predictors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>model4 <span class="ot">&lt;-</span> <span class="fu">glm</span>(SEX <span class="sc">~</span> Y <span class="sc">+</span> DOSE <span class="sc">+</span> RATE <span class="sc">+</span> AGE <span class="sc">+</span> RACE <span class="sc">+</span> WT <span class="sc">+</span> HT, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>), <span class="at">data =</span> mavoglurant4)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = SEX ~ Y + DOSE + RATE + AGE + RACE + WT + HT, family = binomial(link = "logit"), 
+    data = mavoglurant4)
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  6.028e+01  1.805e+01   3.340 0.000839 ***
+Y           -1.038e-03  9.642e-04  -1.076 0.281788    
+DOSE        -8.491e-01  1.920e+02  -0.004 0.996471    
+RATE         1.364e-01  3.199e+01   0.004 0.996599    
+AGE          8.342e-02  6.072e-02   1.374 0.169500    
+RACE2       -1.924e+00  1.376e+00  -1.398 0.161997    
+RACE7        1.186e-01  3.841e+00   0.031 0.975377    
+RACE88      -1.498e+00  2.194e+00  -0.683 0.494894    
+WT          -6.265e-02  7.948e-02  -0.788 0.430542    
+HT          -3.318e+01  1.108e+01  -2.994 0.002757 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 94.242  on 119  degrees of freedom
+Residual deviance: 32.073  on 110  degrees of freedom
+AIC: 52.073
+
+Number of Fisher Scoring iterations: 15</code></pre>
+</div>
 </div>
 
 
