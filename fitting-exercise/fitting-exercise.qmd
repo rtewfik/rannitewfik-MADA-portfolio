@@ -15,6 +15,7 @@ library(dplyr)
 library(ggplot2)
 library(gtsummary)
 library(tidymodels)
+library(caret)
 
 #Load the raw data
 mavoglurant <- read.csv("mavoglurant.csv")
@@ -240,21 +241,18 @@ Finally, let's do some model fitting. First, let's fit a linear model to the out
 
 ```{r}
 #Fit a linear model to the outcome Y using DOSE as the predictor
-model1 <- linear_reg() %>% fit(Y ~ DOSE, data = mavoglurant4)
-model1
-tidy(model1)
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit1 <- linear_model %>% fit(Y ~ DOSE, data = mavoglurant4)
+tidy(linear_fit1)
 
-#Compute RMSE
-augmented_model1 <- augment(model1, new_data = mavoglurant4)
-rmse <- sqrt(mean(augmented_model1$.resid^2))
-             
-#Compue R-squared
-predictions <- predict(model1, new_data = mavoglurant4)
-rsquared <- cor(mavoglurant4$Y, predictions)^2
+#Compute RMSE and R-squared
+metrics1 <- linear_fit1 %>% 
+  predict(mavoglurant4) %>% 
+  bind_cols(mavoglurant4) %>% 
+  metrics(truth = Y, estimate = .pred)
 
 #Print RMSE and R-squared
-cat("RMSE:", rmse, "\n")
-cat("R-squared:", rsquared, "\n")
+print(metrics1)
 ```
 
 
@@ -266,25 +264,22 @@ Now let's fit a linear model to the outcome, Y, using all other variables as the
 
 ```{r}
 #Fit a linear model to the outcome Y using all other variables as the predictors
-model2 <- linear_reg() %>% fit(Y ~ DOSE + RATE + AGE + SEX + RACE + WT + HT, data = mavoglurant4)
-model2
-tidy(model2)
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit2 <- linear_model %>% fit(Y ~ ., data = mavoglurant4)
+tidy(linear_fit2)
 
-#Compute RMSE
-augmented_model2 <- augment(model2, new_data = mavoglurant4)
-rmse <- sqrt(mean(augmented_model2$.resid^2))
-             
-#Compue R-squared
-predictions <- predict(model2, new_data = mavoglurant4)
-rsquared <- cor(mavoglurant4$Y, predictions)^2
+#Compute RMSE and R-squared
+metrics2 <- linear_fit2 %>% 
+  predict(mavoglurant4) %>% 
+  bind_cols(mavoglurant4) %>% 
+  metrics(truth = Y, estimate = .pred)
 
 #Print RMSE and R-squared
-cat("RMSE:", rmse, "\n")
-cat("R-squared:", rsquared, "\n")
+print(metrics2)
 ```
 
 
-In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.01) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 1.07e-13 units for every unit change in DOSE. R-squared = 1 indicates that 100% of the variability in total drug (Y) is explained by the model. RMSE = 6.89e-13 represents the average distance between the predicted values from the model and the actual values in the dataset. 
+In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value = 0.005) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 146.87 units for every unit change in DOSE. R-squared = 0.6292 indicates that 62.92% of the variability in total drug (Y) is explained by the model. RMSE = 583.09 represents the average distance between the predicted values from the model and the actual values in the dataset. 
 
 Both Model 1 and Model 2, DOSE is significantly associated with Y, which makes sense because we would expect an increase in total drug (Y) when increasing dose. The model with all predictors seems to be better than the model with just DOSE.
 
@@ -294,22 +289,26 @@ Next let's fit a logistic model to the outcome, SEX, using DOSE as the predictor
 
 ```{r}
 #Fit a logistic model to the outcome SEX using DOSE as the predictor
-model3 <- logistic_reg() %>% fit(SEX ~ DOSE, data = mavoglurant4)
-model3
-tidy(model3)
-odds_ratio <- exp(tidy(model3)$estimate)
-print(odds_ratio)
+logistic_model <- logistic_reg() %>% set_engine("glm")
+logistic_fit1 <- logistic_model %>% fit(SEX ~ DOSE, data = mavoglurant4)
+tidy(logistic_fit1)
 
 #Compute accuracy
-augmented_model3 <- augment(model3, new_data = mavoglurant4)
-accuracy <- accuracy(augmented_model3, truth = SEX, estimate = .pred_class)
+accuracy1 <- logistic_fit1 %>% 
+  predict(mavoglurant4) %>% 
+  bind_cols(mavoglurant4) %>% 
+  metrics(truth = SEX, estimate = .pred_class) %>% 
+  filter(.metric == "accuracy") 
 
 #Compute ROC-AUC
-roc.auc <- roc_auc(augmented_model3, SEX, .pred_1)
+auc1 <-  logistic_fit1 %>%
+  predict(mavoglurant4, type = "prob") %>%
+  bind_cols(mavoglurant4) %>%
+  roc_auc(truth = SEX, .pred_1)
 
 #Print accuracy and ROC-AUC
-print(accuracy)
-print(roc.auc)
+print(accuracy1)
+print(auc1)
 ```
 
 
@@ -321,22 +320,26 @@ Finally, let's fit a logistic model to the outcome, SEX, using all other variabl
 
 ```{r}
 #Fit a logistic model to the outcome SEX using all other variables as the predictors
-model4 <- logistic_reg() %>% fit(SEX ~ DOSE + Y + RATE + AGE + RACE + WT + HT, data = mavoglurant4)
-model4
-tidy(model4)
-odds_ratio <- exp(tidy(model4)$estimate)
-print(odds_ratio)
+logistic_model <- logistic_reg() %>% set_engine("glm")
+logistic_fit2 <- logistic_model %>% fit(SEX ~ ., data = mavoglurant4)
+tidy(logistic_fit2)
 
 #Compute accuracy
-augmented_model4 <- augment(model4, new_data = mavoglurant4)
-accuracy <- accuracy(augmented_model4, truth = SEX, estimate = .pred_class)
+accuracy2 <- logistic_fit2 %>% 
+  predict(mavoglurant4) %>% 
+  bind_cols(mavoglurant4) %>% 
+  metrics(truth = SEX, estimate = .pred_class) %>% 
+  filter(.metric %in% c("accuracy"))
 
 #Compute ROC-AUC
-roc.auc <- roc_auc(augmented_model4, SEX, .pred_1)
+auc2 <-  logistic_fit2 %>%
+  predict(mavoglurant4, type = "prob") %>%
+  bind_cols(mavoglurant4) %>%
+  roc_auc(truth = SEX, .pred_1)
 
 #Print accuracy and ROC-AUC
-print(accuracy)
-print(roc.auc)
+print(accuracy2)
+print(auc2)
 ```
 
 
@@ -345,4 +348,178 @@ In Model 4, the variable DOSE is not significantly associated with the outcome S
 Both Model 3 and Model 4, DOSE is not significantly associated with SEX, which makes sense because we would not necessarily expect a relationship between those two variables. The model with all predictors is more accurate than the model with just DOSE.
 
 
+## Part 4 - Model Improvement
+
+
+Let's do some more changes to the data. First, let's remove the RATE and RACE variables since some values are coded "7" or "88", which most likely indicates missing values. Then let's set a seed and split the data randomly into a 75% train and 25% test set.
+
+
+```{r}
+#Create a subset dataset without RACE
+mavoglurant5 <- mavoglurant4[, c("Y", "DOSE", "AGE", "SEX", "WT", "HT")]
+
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Split the data randomly into 75% train and 25% test set
+data_split <- initial_split(mavoglurant5, prop = 3/4)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+```
+
+
+Now let's do some model fitting with the training data. First, let's fit a linear model to the outcome, Y, using DOSE as the predictor.
+
+
+```{r}
+#Fit a linear model to the outcome Y using DOSE as the predictor
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit1 <- linear_model %>% fit(Y ~ DOSE, data = train_data)
+tidy(linear_fit1)
+
+#Compute RMSE and R-squared
+metrics1 <- linear_fit1 %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+#Print RMSE and R-squared
+print(metrics1)
+```
+
+
+In Model 1, the variable DOSE is significantly associated with the outcome Y (p-value < 0.001). The total drug (Y) increases by 53.42 units for every unit change in DOSE. R-squared = 0.4508 indicates that 45.08% of the variability in total drug (Y) is explained by the model. RMSE = 702.81 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+Now let's fit a linear model to the outcome, Y, using all other variables as the predictors.
+
+
+```{r}
+#Fit a linear model to the outcome Y using all other variables as the predictors
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit2 <- linear_model %>% fit(Y ~ ., data = train_data)
+tidy(linear_fit2)
+
+#Compute RMSE and R-squared
+metrics2 <- linear_fit2 %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+#Print RMSE and R-squared
+print(metrics2)
+```
+
+
+In Model 2, the variable DOSE is significantly associated with the outcome Y (p-value < 0.001) when the other predictors are included in the model. Adjusting for the other variables, the total drug (Y) increases by 55.34 units for every unit change in DOSE. R-squared = 0.5623 indicates that 56.23% of the variability in total drug (Y) is explained by the model. RMSE = 627.44 represents the average distance between the predicted values from the model and the actual values in the dataset. 
+
+Both Model 1 and Model 2, DOSE is significantly associated with Y, which makes sense because we would expect an increase in total drug (Y) when increasing dose. The model with all predictors seems to be better than the model with just DOSE.
+
+
+Next let's compare the RMSE values for the null model, Model 1, and Model 2. 
+
+
+```{r}
+#Fit a null model to the outcome Y
+linear_model <- linear_reg() %>% set_engine("lm")
+null_model <- linear_model %>% fit(Y ~ 1, data = train_data)
+tidy(null_model)
+
+#Compute RMSE for the null model
+metrics_null <- null_model %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+#Print RMSE for the null model, Model 1, and Model 2
+print(metrics_null)
+print(metrics1)
+print(metrics2)
+```
+
+
+Using the training data and comparing the RMSE values for the three models, the best-performing model is Model 2 with all predictors (RMSE = 627.44), and the worst-performing model is the null model (RMSE = 948.35).
+
+
+Now let's do a 10-fold cross-validation to compute performance on unseen data. First, let's define the training control as cross-validation and K = 10 folds. Then let's compute the RMSE values for Model 1 and Model using 10-fold cross-validation.
+
+
+```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Define the training control as cross-validation and K = 10 folds
+train_control <- trainControl(method = "cv", number = 10)
+
+#Fit a linear model to the outcome Y using DOSE as the predictor
+model1 <- train(Y ~ DOSE, data = train_data, method = "lm", trCrontol = train_control)
+
+#Fit a linear model to the outcome Y using all other variables as the predictors
+model2 <- train(Y ~ ., data = train_data, method = "lm", trCrontrol = train_control)
+
+#Print RMSE for Model 1 and Model 2
+print(model1)
+print(model2)
+```
+
+
+Using 10-fold cross-validation on the training data and comparing the RMSE values for the two models, Model 1 with just DOSE (RMSE = 691.80) performs slightly better than Model 2 with all predictors (RMSE = 696.23). In the previous analysis without cross-validation, Model 2 (RMSE = 627.44) performed better than Model 1 (RMSE = 702.81).
+
+
+Finally, let's re-create the cross-validation folds and re-fit the linear models using a different value for the random seed.
+
+
+```{r}
+#Set a seed
+rngseed = 5678
+set.seed(rngseed)
+
+#Split the data randomly into 75% train and 25% test set
+data_split <- initial_split(mavoglurant5, prop = 3/4)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+
+#Fit a linear model to the outcome Y using DOSE as the predictor
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit1 <- linear_model %>% fit(Y ~ DOSE, data = train_data)
+tidy(linear_fit1)
+
+#Fit a linear model to the outcome Y using all other variables as the predictors
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit2 <- linear_model %>% fit(Y ~ ., data = train_data)
+tidy(linear_fit2)
+
+#Compute RMSE
+metrics1 <- linear_fit1 %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+metrics2 <- linear_fit2 %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+#Print RMSE
+print(metrics1)
+print(metrics2)
+
+#Define the training control as cross-validation and K = 10 folds
+train_control <- trainControl(method = "cv", number = 10)
+
+#Fit a linear model to the outcome Y using DOSE as the predictor
+model1 <- train(Y ~ DOSE, data = train_data, method = "lm", trCrontol = train_control)
+
+#Fit a linear model to the outcome Y using all other variables as the predictors
+model2 <- train(Y ~ ., data = train_data, method = "lm", trCrontrol = train_control)
+
+#Print RMSE for Model 1 and Model 2
+print(model1)
+print(model2)
+```
+
+
+Using a different random seed for the training data and comparing the RMSE values for the two models, Model 2 with all predictors (RMSE = 616.21) performs better than Model 1 with just DOSE (RMSE = 693.89). Using the same seed for the 10-fold cross-validation, Model 1 with just DOSE (RMSE = 693.70) performs slightly better than Model 2 with all predictors (RMSE = 697.21). The overall pattern between changes in the RMSE values for model fitting to the training data with and without cross-validation is the same when using different random seeds.
 
