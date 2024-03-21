@@ -16,6 +16,7 @@ library(ggplot2)
 library(gtsummary)
 library(tidymodels)
 library(caret)
+library(purrr)  # For map function
 
 #Load the raw data
 mavoglurant <- read.csv("mavoglurant.csv")
@@ -523,3 +524,132 @@ print(model2)
 
 Using a different random seed for the training data and comparing the RMSE values for the two models, Model 2 with all predictors (RMSE = 616.21) performs better than Model 1 with just DOSE (RMSE = 693.89). Using the same seed for the 10-fold cross-validation, Model 1 with just DOSE (RMSE = 693.70) performs slightly better than Model 2 with all predictors (RMSE = 697.21). The overall pattern between changes in the RMSE values for model fitting to the training data with and without cross-validation is the same when using different random seeds.
 
+
+# THIS SECTION WAS ADDED BY EMMA HARDIN-PARKER 
+
+Plotting the observed vs. predicted values for the three original model fits, including the null model. 
+
+```{r}
+# Augmenting predicted & observed values
+a_1 <- augment(linear_fit1, new_data = train_data)
+a_2 <- augment(linear_fit2, new_data = train_data)
+a_n <- augment(null_model, new_data = train_data)
+
+# Combining into dataframe 
+combined_augmented <- bind_rows(
+  a_1 %>% mutate(Model = "Linear Fit 1"),
+  a_2 %>% mutate(Model = "Linear Fit 2"),
+  a_n %>% mutate(Model = "Null Model")
+)
+
+
+# Create the plot
+obs_pred_plot <- ggplot(combined_augmented, aes(x = Y, y = .pred, color = Model, shape = Model)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(
+    title = "Observed vs Predicted Values",
+    x = "Observed",
+    y = "Predicted",
+    color = "Model",
+    shape = "Model"
+  ) +
+  theme_minimal()
+
+# Display the plot
+print(obs_pred_plot)
+
+```
+
+Using bootstrapping to sample the data, fit models to the data, and calculate uncertainty. 
+
+Setting the seed, again. 
+```{r}
+rngseed = 1234
+set.seed(rngseed)
+```
+
+Creating 100 bootstraps using the bootstrap() function from the rsample package and creating a plot of the observed vs. predicted values along with Bootstrap Confidence Intervals.
+
+```{r}
+# Create 100 bootstraps using the training data
+bootstraps <- bootstraps(data = train_data, times = 100)
+
+# Create empty vector to store predictions 
+preds_bs <- list()
+
+# Loop through each bootstrap sample
+
+for (i in 1:length(bootstraps$splits)) {
+  # Get a single bootstrap sample
+  dat_sample <- rsample::analysis(bootstraps$splits[[i]])
+  
+  # Fit the model to the bootstrap sample
+  linear_fit_bs <- linear_model %>% fit(Y ~ ., data = dat_sample)
+  
+  # Make predictions for the original training data
+  pred <- predict(linear_fit_bs, new_data = train_data)
+  
+  # Store predictions in the list
+  preds_bs[[i]] <- pred
+}
+
+# Convert list of predictions to a matrix
+pred_matrix <- do.call(cbind, preds_bs)
+
+# Compute mean and confidence intervals
+preds <- apply(pred_matrix, 1, quantile, c(0.055, 0.5, 0.945)) %>% t()
+preds <- data.frame(preds)
+
+
+# Plotting the figure
+obs_pred_plot_2 <- ggplot() +
+  geom_point(data = train_data, aes(x = Y, y = preds[, 2]), color = "black", size = 3) +  # Point estimate
+  geom_point(data = train_data, aes(x = Y, y = preds[, 1]), color = "blue", size = 2) +    # Lower bound
+  geom_point(data = train_data, aes(x = Y, y = preds[, 3]), color = "red", size = 2) +   # Upper bound
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +                           # 45-degree line
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(
+    title = "Observed vs Predicted Values with Bootstrap Confidence Intervals",
+    x = "Observed",
+    y = "Predicted",
+    color = "Estimates"
+  ) +
+  theme_minimal() +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Model 2") 
+
+
+# Show the plot
+print(obs_pred_plot_2)
+
+```
+
+
+```{r}
+#Create a data frame with the observed and predicted values for Model 2
+mod2_df <- lm(Y ~ ., data = train_data)
+mod2_df2 <- fortify(mod2_df)
+
+#Add the median and confidence intervals to the same data frame as the observed and predicted values for Model 2
+mod2_df2$lower <- preds$X5.5.
+mod2_df2$median <- preds$X50.
+mod2_df2$upper <- preds$X94.5.
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+obs_mod2 <- ggplot(mod2_df2, aes(x = Y)) +
+  geom_point(aes(y = .fitted, color = "Point Estimates"), alpha = 0.7) +
+  geom_point(aes(y = lower, color = "Lower Bounds"), alpha = 0.7) +
+  geom_point(aes(y = median, color = "Medians"), alpha = 0.7) +
+  geom_point(aes(y = upper, color = "Upper Bounds"), alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Model 2") +
+  theme_minimal()
+obs_mod2
+```
+
+I ultimately decided to create the plot in two different ways as a way to confirm that I was achieving the intended results. All of the lower bound points, median points, point estimates, and upper bound points tend to follow along the 45 degree line included in the plot. This indicates that the model is performing well, has high level of goodness of fit, and consistency in which the model is not systematically overestimating or underestimating the outcomes.
