@@ -293,7 +293,7 @@ Attaching package: 'dplyr'</code></pre>
 ✖ dplyr::filter()        masks stats::filter()
 ✖ dplyr::lag()           masks stats::lag()
 ✖ recipes::step()        masks stats::step()
-• Use suppressPackageStartupMessages() to eliminate package startup messages</code></pre>
+• Dig deeper into tidy modeling with R at https://www.tmwr.org</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -316,7 +316,7 @@ Attaching package: 'caret'</code></pre>
 
     lift</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)  <span class="co"># For map function</span></span>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Load the raw data</span></span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>mavoglurant <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"mavoglurant.csv"</span>)</span>
@@ -624,23 +624,23 @@ Attaching package: 'caret'</code></pre>
 <span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>mavoglurant4 <span class="sc">%&gt;%</span> <span class="fu">tbl_summary</span>(<span class="at">by =</span> DOSE, <span class="at">statistic =</span> <span class="fu">list</span>(<span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">"{mean} ({sd})"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modify_caption</span>(<span class="st">"Summary Table of Mavoglurant Data, Stratified by Dose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="hsudwdaspj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#hsudwdaspj table {
+<div id="pxmjqumxbc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#pxmjqumxbc table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#hsudwdaspj thead, #hsudwdaspj tbody, #hsudwdaspj tfoot, #hsudwdaspj tr, #hsudwdaspj td, #hsudwdaspj th {
+#pxmjqumxbc thead, #pxmjqumxbc tbody, #pxmjqumxbc tfoot, #pxmjqumxbc tr, #pxmjqumxbc td, #pxmjqumxbc th {
   border-style: none;
 }
 
-#hsudwdaspj p {
+#pxmjqumxbc p {
   margin: 0;
   padding: 0;
 }
 
-#hsudwdaspj .gt_table {
+#pxmjqumxbc .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -666,12 +666,12 @@ Attaching package: 'caret'</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_caption {
+#pxmjqumxbc .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#hsudwdaspj .gt_title {
+#pxmjqumxbc .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -683,7 +683,7 @@ Attaching package: 'caret'</code></pre>
   border-bottom-width: 0;
 }
 
-#hsudwdaspj .gt_subtitle {
+#pxmjqumxbc .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -695,7 +695,7 @@ Attaching package: 'caret'</code></pre>
   border-top-width: 0;
 }
 
-#hsudwdaspj .gt_heading {
+#pxmjqumxbc .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -707,13 +707,13 @@ Attaching package: 'caret'</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_bottom_border {
+#pxmjqumxbc .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_col_headings {
+#pxmjqumxbc .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -728,7 +728,7 @@ Attaching package: 'caret'</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_col_heading {
+#pxmjqumxbc .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -748,7 +748,7 @@ Attaching package: 'caret'</code></pre>
   overflow-x: hidden;
 }
 
-#hsudwdaspj .gt_column_spanner_outer {
+#pxmjqumxbc .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -760,15 +760,15 @@ Attaching package: 'caret'</code></pre>
   padding-right: 4px;
 }
 
-#hsudwdaspj .gt_column_spanner_outer:first-child {
+#pxmjqumxbc .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#hsudwdaspj .gt_column_spanner_outer:last-child {
+#pxmjqumxbc .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#hsudwdaspj .gt_column_spanner {
+#pxmjqumxbc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -780,11 +780,11 @@ Attaching package: 'caret'</code></pre>
   width: 100%;
 }
 
-#hsudwdaspj .gt_spanner_row {
+#pxmjqumxbc .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#hsudwdaspj .gt_group_heading {
+#pxmjqumxbc .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -810,7 +810,7 @@ Attaching package: 'caret'</code></pre>
   text-align: left;
 }
 
-#hsudwdaspj .gt_empty_group_heading {
+#pxmjqumxbc .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -825,15 +825,15 @@ Attaching package: 'caret'</code></pre>
   vertical-align: middle;
 }
 
-#hsudwdaspj .gt_from_md > :first-child {
+#pxmjqumxbc .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#hsudwdaspj .gt_from_md > :last-child {
+#pxmjqumxbc .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#hsudwdaspj .gt_row {
+#pxmjqumxbc .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -852,7 +852,7 @@ Attaching package: 'caret'</code></pre>
   overflow-x: hidden;
 }
 
-#hsudwdaspj .gt_stub {
+#pxmjqumxbc .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -865,7 +865,7 @@ Attaching package: 'caret'</code></pre>
   padding-right: 5px;
 }
 
-#hsudwdaspj .gt_stub_row_group {
+#pxmjqumxbc .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -879,15 +879,15 @@ Attaching package: 'caret'</code></pre>
   vertical-align: top;
 }
 
-#hsudwdaspj .gt_row_group_first td {
+#pxmjqumxbc .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#hsudwdaspj .gt_row_group_first th {
+#pxmjqumxbc .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#hsudwdaspj .gt_summary_row {
+#pxmjqumxbc .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -897,16 +897,16 @@ Attaching package: 'caret'</code></pre>
   padding-right: 5px;
 }
 
-#hsudwdaspj .gt_first_summary_row {
+#pxmjqumxbc .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_first_summary_row.thick {
+#pxmjqumxbc .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#hsudwdaspj .gt_last_summary_row {
+#pxmjqumxbc .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -916,7 +916,7 @@ Attaching package: 'caret'</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_grand_summary_row {
+#pxmjqumxbc .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -926,7 +926,7 @@ Attaching package: 'caret'</code></pre>
   padding-right: 5px;
 }
 
-#hsudwdaspj .gt_first_grand_summary_row {
+#pxmjqumxbc .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -936,7 +936,7 @@ Attaching package: 'caret'</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_last_grand_summary_row_top {
+#pxmjqumxbc .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -946,11 +946,11 @@ Attaching package: 'caret'</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_striped {
+#pxmjqumxbc .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#hsudwdaspj .gt_table_body {
+#pxmjqumxbc .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -959,7 +959,7 @@ Attaching package: 'caret'</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_footnotes {
+#pxmjqumxbc .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -973,7 +973,7 @@ Attaching package: 'caret'</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_footnote {
+#pxmjqumxbc .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -982,7 +982,7 @@ Attaching package: 'caret'</code></pre>
   padding-right: 5px;
 }
 
-#hsudwdaspj .gt_sourcenotes {
+#pxmjqumxbc .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -996,7 +996,7 @@ Attaching package: 'caret'</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hsudwdaspj .gt_sourcenote {
+#pxmjqumxbc .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1004,63 +1004,63 @@ Attaching package: 'caret'</code></pre>
   padding-right: 5px;
 }
 
-#hsudwdaspj .gt_left {
+#pxmjqumxbc .gt_left {
   text-align: left;
 }
 
-#hsudwdaspj .gt_center {
+#pxmjqumxbc .gt_center {
   text-align: center;
 }
 
-#hsudwdaspj .gt_right {
+#pxmjqumxbc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#hsudwdaspj .gt_font_normal {
+#pxmjqumxbc .gt_font_normal {
   font-weight: normal;
 }
 
-#hsudwdaspj .gt_font_bold {
+#pxmjqumxbc .gt_font_bold {
   font-weight: bold;
 }
 
-#hsudwdaspj .gt_font_italic {
+#pxmjqumxbc .gt_font_italic {
   font-style: italic;
 }
 
-#hsudwdaspj .gt_super {
+#pxmjqumxbc .gt_super {
   font-size: 65%;
 }
 
-#hsudwdaspj .gt_footnote_marks {
+#pxmjqumxbc .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#hsudwdaspj .gt_asterisk {
+#pxmjqumxbc .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#hsudwdaspj .gt_indent_1 {
+#pxmjqumxbc .gt_indent_1 {
   text-indent: 5px;
 }
 
-#hsudwdaspj .gt_indent_2 {
+#pxmjqumxbc .gt_indent_2 {
   text-indent: 10px;
 }
 
-#hsudwdaspj .gt_indent_3 {
+#pxmjqumxbc .gt_indent_3 {
   text-indent: 15px;
 }
 
-#hsudwdaspj .gt_indent_4 {
+#pxmjqumxbc .gt_indent_4 {
   text-indent: 20px;
 }
 
-#hsudwdaspj .gt_indent_5 {
+#pxmjqumxbc .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2055,8 +2055,8 @@ Tuning parameter 'intercept' was held constant at a value of TRUE</code></pre>
 </div>
 <p>Using a different random seed for the training data and comparing the RMSE values for the two models, Model 2 with all predictors (RMSE = 616.21) performs better than Model 1 with just DOSE (RMSE = 693.89). Using the same seed for the 10-fold cross-validation, Model 1 with just DOSE (RMSE = 693.70) performs slightly better than Model 2 with all predictors (RMSE = 697.21). The overall pattern between changes in the RMSE values for model fitting to the training data with and without cross-validation is the same when using different random seeds.</p>
 </section>
-<section id="this-section-was-added-by-emma-hardin-parker" class="level1">
-<h1>THIS SECTION WAS ADDED BY EMMA HARDIN-PARKER</h1>
+<section id="this-section-was-added-by-emma-hardin-parker" class="level2">
+<h2 class="anchored" data-anchor-id="this-section-was-added-by-emma-hardin-parker">THIS SECTION WAS ADDED BY EMMA HARDIN-PARKER</h2>
 <p>Plotting the observed vs.&nbsp;predicted values for the three original model fits, including the null model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb146"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Augmenting predicted &amp; observed values</span></span>
@@ -2208,6 +2208,55 @@ Removed 1 rows containing missing values (`geom_point()`).</code></pre>
 </div>
 </div>
 <p>I ultimately decided to create the plot in two different ways as a way to confirm that I was achieving the intended results. All of the lower bound points, median points, point estimates, and upper bound points tend to follow along the 45 degree line included in the plot. This indicates that the model is performing well, has high level of goodness of fit, and consistency in which the model is not systematically overestimating or underestimating the outcomes.</p>
+</section>
+<section id="final-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="final-evaluation">Final Evaluation</h2>
+<p>Let’s do a final model evaluation, this time using the test data. First, let’s use the fit of Model 2 on the training data to make predictions for the test data. Then let’s make a plot that shows predicted versus observed values for both the training data and the test data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb153"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a data frame with the observed and predicted values for the training data</span></span>
+<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a>mod2_df <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> ., <span class="at">data =</span> train_data)</span>
+<span id="cb153-3"><a href="#cb153-3" aria-hidden="true" tabindex="-1"></a>mod2_df2 <span class="ot">&lt;-</span> <span class="fu">fortify</span>(mod2_df)</span>
+<span id="cb153-4"><a href="#cb153-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-5"><a href="#cb153-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Make predictions for the test data</span></span>
+<span id="cb153-6"><a href="#cb153-6" aria-hidden="true" tabindex="-1"></a>pred_test <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">predict</span>(mod2_df, <span class="at">newdata =</span> test_data))</span>
+<span id="cb153-7"><a href="#cb153-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-8"><a href="#cb153-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Add the Y values to the same data frame as the test data predictions</span></span>
+<span id="cb153-9"><a href="#cb153-9" aria-hidden="true" tabindex="-1"></a>mod2_df2_test <span class="ot">&lt;-</span> <span class="fu">fortify</span>(<span class="fu">lm</span>(Y <span class="sc">~</span> ., <span class="at">data =</span> test_data))</span>
+<span id="cb153-10"><a href="#cb153-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-11"><a href="#cb153-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Combine the data frames with the observed and predicted values for the test data</span></span>
+<span id="cb153-12"><a href="#cb153-12" aria-hidden="true" tabindex="-1"></a>combined_test <span class="ot">&lt;-</span> <span class="fu">cbind</span>(mod2_df2_test, pred_test)</span>
+<span id="cb153-13"><a href="#cb153-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-14"><a href="#cb153-14" aria-hidden="true" tabindex="-1"></a><span class="co">#Merge the data frames with the training data and test data predictions</span></span>
+<span id="cb153-15"><a href="#cb153-15" aria-hidden="true" tabindex="-1"></a>merged <span class="ot">&lt;-</span> <span class="fu">merge</span>(mod2_df2, combined_test, <span class="at">by =</span> <span class="st">"Y"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb153-16"><a href="#cb153-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-17"><a href="#cb153-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Rename the test data predictions variable</span></span>
+<span id="cb153-18"><a href="#cb153-18" aria-hidden="true" tabindex="-1"></a>merged <span class="ot">&lt;-</span> merged <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">pred_test =</span> <span class="st">`</span><span class="at">predict(mod2_df, newdata = test_data)</span><span class="st">`</span>)</span>
+<span id="cb153-19"><a href="#cb153-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb153-20"><a href="#cb153-20" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a figure that plots observed values on the x-axis and predicted values on the y-axis</span></span>
+<span id="cb153-21"><a href="#cb153-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged, <span class="fu">aes</span>(<span class="at">x =</span> Y)) <span class="sc">+</span></span>
+<span id="cb153-22"><a href="#cb153-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> .fitted.x, <span class="at">color =</span> <span class="st">"Training Data"</span>), <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb153-23"><a href="#cb153-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_test, <span class="at">color =</span> <span class="st">"Test Data"</span>), <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb153-24"><a href="#cb153-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb153-25"><a href="#cb153-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">5000</span>) <span class="sc">+</span></span>
+<span id="cb153-26"><a href="#cb153-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">5000</span>) <span class="sc">+</span></span>
+<span id="cb153-27"><a href="#cb153-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observed Values"</span>, <span class="at">y =</span> <span class="st">"Predicted Values"</span>, <span class="at">title =</span> <span class="st">"Observed vs. Predicted Values for the Training and Test Data"</span>) <span class="sc">+</span></span>
+<span id="cb153-28"><a href="#cb153-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 31 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 90 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="fitting-exercise_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows that the observed and predicted values for the test data are mixed in with the training data, which is what we want to see. If the test data points were systematically “off”, then it would indicate a problem, such as overfitting to the training data.</p>
+<p>Finally, let’s critique all models. Both Model 1 and Model 2 perform better than the null model based on the RMSE values. Model 1 with only DOSE as the predictor improves the results over the null model (i.e., smaller RMSE). For both Model 1 and Model 2, DOSE is significantly associated with Y, which makes sense because we would expect an increase in total drug (Y) when increasing dose. Because the inclusion of other predictors in the model helps to better explain the outcome pattern, we would not consider Model 1 usable for any real-life purpose. Additional analyses, including the bootstrap method and making predictions for the test data, indicate that Model 2 with all predictors seems to be better than Model 1 with just DOSE.</p>
 
 
 </section>

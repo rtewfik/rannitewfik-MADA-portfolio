@@ -16,7 +16,7 @@ library(ggplot2)
 library(gtsummary)
 library(tidymodels)
 library(caret)
-library(purrr)  # For map function
+library(purrr)
 
 #Load the raw data
 mavoglurant <- read.csv("mavoglurant.csv")
@@ -525,7 +525,7 @@ print(model2)
 Using a different random seed for the training data and comparing the RMSE values for the two models, Model 2 with all predictors (RMSE = 616.21) performs better than Model 1 with just DOSE (RMSE = 693.89). Using the same seed for the 10-fold cross-validation, Model 1 with just DOSE (RMSE = 693.70) performs slightly better than Model 2 with all predictors (RMSE = 697.21). The overall pattern between changes in the RMSE values for model fitting to the training data with and without cross-validation is the same when using different random seeds.
 
 
-# THIS SECTION WAS ADDED BY EMMA HARDIN-PARKER 
+## THIS SECTION WAS ADDED BY EMMA HARDIN-PARKER 
 
 Plotting the observed vs. predicted values for the three original model fits, including the null model. 
 
@@ -653,3 +653,49 @@ obs_mod2
 ```
 
 I ultimately decided to create the plot in two different ways as a way to confirm that I was achieving the intended results. All of the lower bound points, median points, point estimates, and upper bound points tend to follow along the 45 degree line included in the plot. This indicates that the model is performing well, has high level of goodness of fit, and consistency in which the model is not systematically overestimating or underestimating the outcomes.
+
+
+## Final Evaluation
+
+
+Let's do a final model evaluation, this time using the test data. First, let's use the fit of Model 2 on the training data to make predictions for the test data. Then let's make a plot that shows predicted versus observed values for both the training data and the test data.
+
+
+```{r}
+#Create a data frame with the observed and predicted values for the training data
+mod2_df <- lm(Y ~ ., data = train_data)
+mod2_df2 <- fortify(mod2_df)
+
+#Make predictions for the test data
+pred_test <- as.data.frame(predict(mod2_df, newdata = test_data))
+
+#Add the Y values to the same data frame as the test data predictions
+mod2_df2_test <- fortify(lm(Y ~ ., data = test_data))
+
+#Combine the data frames with the observed and predicted values for the test data
+combined_test <- cbind(mod2_df2_test, pred_test)
+
+#Merge the data frames with the training data and test data predictions
+merged <- merge(mod2_df2, combined_test, by = "Y", all = TRUE)
+
+#Rename the test data predictions variable
+merged <- merged %>% rename(pred_test = `predict(mod2_df, newdata = test_data)`)
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(merged, aes(x = Y)) +
+  geom_point(aes(y = .fitted.x, color = "Training Data"), alpha = 0.7) +
+  geom_point(aes(y = pred_test, color = "Test Data"), alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Training and Test Data") +
+  theme_minimal()
+```
+
+
+The plot shows that the observed and predicted values for the test data are mixed in with the training data, which is what we want to see. If the test data points were systematically "off", then it would indicate a problem, such as overfitting to the training data.
+
+
+Finally, let's critique all models. Both Model 1 and Model 2 perform better than the null model based on the RMSE values. Model 1 with only DOSE as the predictor improves the results over the null model (i.e., smaller RMSE). For both Model 1 and Model 2, DOSE is significantly associated with Y, which makes sense because we would expect an increase in total drug (Y) when increasing dose. Because the inclusion of other predictors in the model helps to better explain the outcome pattern, we would not consider Model 1 usable for any real-life purpose. Additional analyses, including the bootstrap method and making predictions for the test data, indicate that Model 2 with all predictors seems to be better than Model 1 with just DOSE. 
+
+
