@@ -57,6 +57,9 @@ mavoglurant4 <- mavoglurant3[, c("Y", "DOSE", "RATE", "AGE", "SEX", "RACE", "WT"
 #Get an overview and summary of the processed data
 str(mavoglurant4)
 summary(mavoglurant4)
+
+#Save the processed data as rds file
+saveRDS(mavoglurant4, file = "C:/Users/ranni/Desktop/MADA/rannitewfik-MADA-portfolio/fitting-exercise/mavoglurant_processed.rds")
 ```
 
 

@@ -1,0 +1,223 @@
+---
+title: "ML Models Exercise"
+---
+
+
+## Part 1 - Process & Explore the Data
+
+
+Data on a drug candidate called Mavoglurant is available in this [GitHub](https://github.com/metrumresearchgroup/BayesPBPK-tutorial) repository. First, let's further process the dataset from the "Fitting Exercise" to make it ready for model building.
+
+
+```{r}
+#Load the required packages
+library(dplyr)
+library(tidymodels)
+library(ggplot2)
+library(corrplot)
+library(glmnet)
+library(ranger)
+
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Load the data
+mavoglurant <- readRDS("mavoglurant_processed.rds")
+
+#Get an overview and summary of the data
+str(mavoglurant)
+summary(mavoglurant)
+
+#Convert the SEX variable to numeric
+mavoglurant$SEX <- as.numeric(mavoglurant$SEX)
+
+#Drop the RATE variable
+mavoglurant <- mavoglurant %>% select(-RATE)
+
+#Combine the "7" and "88" categories in the RACE variable into a single category called "3"
+mavoglurant <- mavoglurant %>% mutate(RACE = ifelse(RACE %in% c(7, 88), 3, RACE))
+```
+
+
+Next let's make a pairwise correlation plot for the continuous variables.
+
+
+```{r}
+#Create a subset dataset with only continuous variables
+continuous <- mavoglurant %>% select(Y, AGE, WT, HT)
+
+#Create a correlation matrix
+corrmatrix <- cor(continuous)
+
+#Create a correlation plot
+corrplot(corrmatrix, method = "number")
+```
+
+
+The correlation plot shows that none of the pairwise correlations is excessive (i.e., above an absolute value of 0.9). We shouldn't have much of a problem with collinearity.
+
+
+Now let's add a new variable BMI, computed from the HT and WT variables.
+
+
+```{r}
+#Create a new variable BMI from HT and WT
+mavoglurant$BMI <- mavoglurant$WT / (mavoglurant$HT)^2
+```
+
+
+We're done with data processing and exploration, and we're ready to fit some models.
+
+
+## Part 2 - Build the Models
+
+
+Let's explore three models: linear regression with all predictors, LASSO regression, and random forest. First, let's look at the linear regression model.
+
+
+```{r}
+#Linear regression
+
+##Fit the model
+mod <- linear_reg() %>% set_engine("lm")
+
+wflow1 <- workflow() %>% 
+	add_model(mod) %>% 
+	add_formula(Y ~ .)
+
+fit1 <- wflow1 %>% fit(data = mavoglurant)
+
+##Make predictions
+predictions_linear <- augment(fit1, new_data = mavoglurant) %>%
+  mutate(observed = mavoglurant$Y) %>%
+  rename(predicted = .pred)
+
+##Compute RMSE
+RMSE_linear <- fit1 %>% 
+  predict(mavoglurant) %>% 
+  bind_cols(mavoglurant) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+print(RMSE_linear)
+
+##Plot observed vs. predicted values
+ggplot(predictions_linear, aes(x = observed, y = predicted)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Linear Regression Model") +
+  theme_minimal()
+```
+
+
+Next let's look at the LASSO regression model.
+
+
+```{r}
+#LASSO regression
+
+##Fit the model
+lasso_recipe <- recipe(Y ~ ., data = mavoglurant)
+
+lasso_spec <- linear_reg(penalty = 0.1) %>% set_engine("glmnet")
+
+wflow2 <- workflow() %>%
+  add_recipe(lasso_recipe) %>%
+  add_model(lasso_spec)
+
+fit2 <- wflow2 %>% fit(data = mavoglurant)
+
+##Make predictions
+predictions_lasso <- augment(fit2, new_data = mavoglurant) %>%
+  mutate(observed = mavoglurant$Y) %>%
+  rename(predicted = .pred)
+
+##Compute RMSE
+RMSE_lasso <- fit2 %>% 
+  predict(mavoglurant) %>% 
+  bind_cols(mavoglurant) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+print(RMSE_lasso)
+
+##Plot observed vs. predicted values
+ggplot(predictions_lasso, aes(x = observed, y = predicted)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Lasso Regression Model") +
+  theme_minimal()
+```
+
+
+Finally, let's look at the random forest model.
+
+
+```{r}
+#Random forest
+
+##Fit the model
+rf_recipe <- recipe(Y ~ ., data = mavoglurant)
+
+rf_spec <- rand_forest(mode = "regression") %>% set_engine("ranger", seed = rngseed)
+
+wflow3 <- workflow() %>%
+  add_recipe(rf_recipe) %>%
+  add_model(rf_spec)
+
+fit3 <- wflow3 %>% fit(data = mavoglurant)
+
+##Make predictions
+predictions_rf <- augment(fit3, new_data = mavoglurant) %>%
+  mutate(observed = mavoglurant$Y) %>%
+  rename(predicted = .pred)
+
+##Compute RMSE
+RMSE_rf <- fit3 %>% 
+  predict(mavoglurant) %>% 
+  bind_cols(mavoglurant) %>% 
+  metrics(truth = Y, estimate = .pred)
+
+print(RMSE_rf)
+
+##Plot observed vs. predicted values
+ggplot(predictions_rf, aes(x = observed, y = predicted)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  xlim(0, 5000) +
+  ylim(0, 5000) +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Random Forest Model") +
+  theme_minimal()
+```
+
+
+Comparing the RMSE values for the three models, Model 3 with the random forest model (RMSE = 361.66) performs better than Model 1 with linear regression (RMSE = 581.42) and Model 2 with LASSO regression (RMSE = 581.47). The RMSE values and observed versus predicted plots for Model 1 and Model 2 are almost the same results. The Model 3 plot shows that the predictions are overall closer to the observations for the random forest model. Although they easily overfit, random forest models are very flexible and can capture many of the patterns seen in the data.
+
+
+Let's try tuning the LASSO and random forest models.
+
+
+## Part 3 - Tune the Models
+
+
+First let's tune the LASSO model.
+
+
+```{r}
+
+```
+
+
+Now let's tune the random forest model.
+
+
+```{r}
+
+```
+
+
+The
+
