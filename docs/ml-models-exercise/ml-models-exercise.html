@@ -288,7 +288,7 @@ Attaching package: 'dplyr'</code></pre>
 ✖ dplyr::filter()  masks stats::filter()
 ✖ dplyr::lag()     masks stats::lag()
 ✖ recipes::step()  masks stats::step()
-• Dig deeper into tidy modeling with R at https://www.tmwr.org</code></pre>
+• Use suppressPackageStartupMessages() to eliminate package startup messages</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -623,13 +623,17 @@ Attaching package: 'Matrix'</code></pre>
 <p>The plot shows how RMSE changes as the tuning parameters change. The best results (lowest RMSE values) are for higher values of randomly selected predictors (mtry) and lower values of minimal node size (min_n).</p>
 <p>Now let’s do proper tuning by using 5-fold cross-validation repeated 5 times to evaluate model performance during the tuning process. Let’s start with the LASSO model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Tune the model with cross-validation</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>tuned_lasso_cv <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(wflow2,</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> <span class="fu">vfold_cv</span>(mavoglurant, <span class="at">v =</span> <span class="dv">5</span>, <span class="at">repeats =</span> <span class="dv">5</span>),</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> penalty_grid)</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Look at tuning diagnostics</span></span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_lasso_cv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Set a seed</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>rngseed <span class="ot">=</span> <span class="dv">1234</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(rngseed)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Tune the model with cross-validation</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>tuned_lasso_cv <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(wflow2,</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> <span class="fu">vfold_cv</span>(mavoglurant, <span class="at">v =</span> <span class="dv">5</span>, <span class="at">repeats =</span> <span class="dv">5</span>),</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> penalty_grid)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Look at tuning diagnostics</span></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_lasso_cv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -641,13 +645,17 @@ Attaching package: 'Matrix'</code></pre>
 <p>The plot for the LASSO model tuned with cross-validation shows that the LASSO model does best (lowest RMSE value) for low penalty values, and the RMSE value increases as the amount of regularization (penalty parameter) increases.</p>
 <p>Finally, let’s tune the random forest model with cross-validation.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Tune the model with cross-validation</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>tuned_rf_cv <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(wflow3,</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> <span class="fu">vfold_cv</span>(mavoglurant, <span class="at">v =</span> <span class="dv">5</span>, <span class="at">repeats =</span> <span class="dv">5</span>),</span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> tuning_grid)</span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Look at tuning diagnostics</span></span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_rf_cv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Set a seed</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>rngseed <span class="ot">=</span> <span class="dv">1234</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(rngseed)</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Tune the model with cross-validation</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>tuned_rf_cv <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(wflow3,</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> <span class="fu">vfold_cv</span>(mavoglurant, <span class="at">v =</span> <span class="dv">5</span>, <span class="at">repeats =</span> <span class="dv">5</span>),</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> tuning_grid)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Look at tuning diagnostics</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tuned_rf_cv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

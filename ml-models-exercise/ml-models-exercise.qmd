@@ -269,6 +269,10 @@ Now let's do proper tuning by using 5-fold cross-validation repeated 5 times to 
 
 
 ```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
 #Tune the model with cross-validation
 tuned_lasso_cv <- tune_grid(wflow2,
   resamples = vfold_cv(mavoglurant, v = 5, repeats = 5),
@@ -286,6 +290,10 @@ Finally, let's tune the random forest model with cross-validation.
 
 
 ```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
 #Tune the model with cross-validation
 tuned_rf_cv <- tune_grid(wflow3,
   resamples = vfold_cv(mavoglurant, v = 5, repeats = 5),
