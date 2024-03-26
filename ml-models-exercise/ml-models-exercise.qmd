@@ -207,17 +207,94 @@ First let's tune the LASSO model.
 
 
 ```{r}
+#Define the workflow
+lasso_recipe <- recipe(Y ~ ., data = mavoglurant)
 
+lasso_spec <- linear_reg(penalty = tune()) %>% set_engine("glmnet")
+
+wflow2 <- workflow() %>%
+  add_recipe(lasso_recipe) %>%
+  add_model(lasso_spec)
+
+#Define the penalty grid
+penalty_grid <- tibble(penalty = 10^seq(-5, 2, length.out = 50))
+
+#Tune the model
+tuned_lasso <- tune_grid(wflow2,
+  resamples = apparent(mavoglurant),
+  grid = penalty_grid)
+
+#Look at tuning diagnostics
+autoplot(tuned_lasso)
 ```
 
 
-Now let's tune the random forest model.
+The plot shows what happened during the tuning process for the LASSO model. RMSE is a function of the penalty parameter. The LASSO model does best (lowest RMSE value) for low penalty values, and the RMSE value increases as the amount of regularization (penalty parameter) increases. At the lowest penalty, the RMSE value is the same as for the linear model (RMSE = 581). When the penalty parameter is set to its lowest value, the LASSO model essentially becomes equivalent to ordinary linear regression because it does not impose any penalties on the coefficients. As the penalty parameter increases in LASSO tuning, the model becomes simpler, more coefficients are shrunk to zero, and the RMSE generally increases.
+
+
+Then let's tune the random forest model.
 
 
 ```{r}
+#Define the workflow
+rf_recipe <- recipe(Y ~ ., data = mavoglurant)
 
+rf_spec <- rand_forest(mode = "regression", mtry = tune(), min_n = tune(), trees = 300) %>% 
+  set_engine("ranger", seed = rngseed)
+
+wflow3 <- workflow() %>%
+  add_recipe(rf_recipe) %>%
+  add_model(rf_spec)
+
+#Define the tuning grid
+tuning_grid <- grid_regular(
+  mtry(range = c(1, 7)),
+  min_n(range = c(1, 21)),
+  levels = 7)
+
+#Tune the model
+tuned_rf <- tune_grid(wflow3,
+  resamples = apparent(mavoglurant),
+  grid = tuning_grid)
+
+#Look at tuning diagnostics
+autoplot(tuned_rf)
 ```
 
 
-The
+The plot shows how RMSE changes as the tuning parameters change. The best results (lowest RMSE values) are for higher values of randomly selected predictors (mtry) and lower values of minimal node size (min_n).
+
+
+Now let's do proper tuning by using 5-fold cross-validation repeated 5 times to evaluate model performance during the tuning process. Let's start with the LASSO model.
+
+
+```{r}
+#Tune the model with cross-validation
+tuned_lasso_cv <- tune_grid(wflow2,
+  resamples = vfold_cv(mavoglurant, v = 5, repeats = 5),
+  grid = penalty_grid)
+
+#Look at tuning diagnostics
+autoplot(tuned_lasso_cv)
+```
+
+
+The plot for the LASSO model tuned with cross-validation shows that the LASSO model does best (lowest RMSE value) for low penalty values, and the RMSE value increases as the amount of regularization (penalty parameter) increases.
+
+
+Finally, let's tune the random forest model with cross-validation.
+
+
+```{r}
+#Tune the model with cross-validation
+tuned_rf_cv <- tune_grid(wflow3,
+  resamples = vfold_cv(mavoglurant, v = 5, repeats = 5),
+  grid = tuning_grid)
+
+#Look at tuning diagnostics
+autoplot(tuned_rf_cv)
+```
+
+
+The plot for the random forest model tuned with cross-validation shows that the best results (lowest RMSE values) are for higher values of randomly selected predictors (mtry) and lower values of minimal node size (min_n). Compared to the random forest model, the RMSE values are lower for the LASSO model. LASSO regularization helps to mitigate overfitting by penalizing model complexity. Random forests can still be sensitive to noisy data or when the number of trees in the forest is too high. We conclude that the LASSO model performs better.
 
