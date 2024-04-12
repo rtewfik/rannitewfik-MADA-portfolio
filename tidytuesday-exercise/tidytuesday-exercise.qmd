@@ -2,4 +2,736 @@
 title: "Tidy Tuesday Exercise"
 ---
 
-Placeholder file for the future Tidy Tuesday exercise.
+
+# Introduction
+
+
+Data on 2023 and 2024 U.S. solar eclipses are available in this [TidyTuesday](https://github.com/rfordatascience/tidytuesday/tree/master/data/2024/2024-04-09) GitHub repository. The data source is NASA's Scientific Visualization Studio. TidyTuesday is organized by the Data Science Learning Community.
+
+
+# Data Loading & Processing
+
+
+First, let's load the four datasets, add some new variables, and combine them into one dataset for data exploration.
+
+
+```{r}
+#Load the required packages
+library(dplyr)
+library(hms)
+library(ggplot2)
+library(gtsummary)
+library(tidymodels)
+library(caret)
+library(purrr)
+library(rsample)
+library(boot)
+library(car)
+library(glmnet)
+library(ranger)
+
+#Load the raw data
+annular2023 <- read.csv("eclipse_annular_2023.csv")
+partial2023 <- read.csv("eclipse_partial_2023.csv")
+partial2024 <- read.csv("eclipse_partial_2024.csv")
+total2024 <- read.csv("eclipse_total_2024.csv")
+
+#Get a glimpse of the raw data
+glimpse(annular2023)
+glimpse(partial2023)
+glimpse(partial2024)
+glimpse(total2024)
+
+#Add the year and eclipse type to each dataset
+annular2023$year <- "2023"
+annular2023$type <- "annular"
+
+partial2023$year <- "2023"
+partial2023$type <- "partial"
+
+partial2024$year <- "2024"
+partial2024$type <- "partial"
+
+total2024$year <- "2024"
+total2024$type <- "total"
+
+#Combine the four datasets into one dataset
+eclipse <- bind_rows(annular2023, partial2023, partial2024, total2024)
+
+#Convert the time variables into hms format
+eclipse$eclipse_1 <- as_hms(eclipse$eclipse_1)
+eclipse$eclipse_2 <- as_hms(eclipse$eclipse_2)
+eclipse$eclipse_3 <- as_hms(eclipse$eclipse_3)
+eclipse$eclipse_4 <- as_hms(eclipse$eclipse_4)
+eclipse$eclipse_5 <- as_hms(eclipse$eclipse_5)
+eclipse$eclipse_6 <- as_hms(eclipse$eclipse_6)
+
+#Create a new variable "duration" that represents the total time the moon contacts the sun for each eclipse type
+eclipse$duration <- ifelse(eclipse$type %in% c("annular", "total"), 
+                        as.numeric(eclipse$eclipse_6 - eclipse$eclipse_1, "hours"),
+                        as.numeric(eclipse$eclipse_5 - eclipse$eclipse_1, "hours"))
+
+#Get a glimpse of the processed data
+glimpse(eclipse) 
+```
+
+
+The processed dataset has 64,348 observations and 13 variables: "state", "name", "lat", "lon", "eclipse_1", "eclipse_2", "eclipse_3", "eclipse_4", "eclipse_5", "eclipse_6", "year", "type", and "duration".
+
+
+# Data Exploration
+
+
+Now let's explore the variables in the processed dataset, starting with the variable "duration", which represents the total time the moon contacts the sun.
+
+
+```{r}
+#Summary statistics and histogram for the variable "duration"
+summary(eclipse$duration)
+
+ggplot(eclipse, aes(x = duration)) +
+  geom_histogram() +
+  labs(x = "Eclipse Duration (hours)", y = "Frequency", title = "Histogram of Eclipse Duration")
+```
+
+
+The mean and median for the variable "duration" are the same (2.58). The histogram of "duration" shows a relatively normal distribution for most of the data (duration > 1.5 hours). There are a few observations for duration less than 1.5 hours.
+
+
+Next let's explore the variable "eclipse_3", which represents the time at which the eclipse reaches 100% of the location's maximum.
+
+
+```{r}
+#Summary statistics and histogram for the variable "eclipse_3"
+eclipse$eclipse_3 <- as.numeric(eclipse$eclipse_3)
+summary(eclipse$eclipse_3)
+
+ggplot(eclipse, aes(x = eclipse_3)) +
+  geom_histogram() +
+  labs(x = "Time of Maximum Eclipse", y = "Frequency", title = "Histogram of Time of Maximum Eclipse")
+```
+
+
+The mean time is greater than the median time for the variable "eclipse_3". The histogram of "eclipse_3" shows a bimodal distribution with two peaks that represent the two most frequent times for maximum eclipse.
+
+
+Then let's explore the variable "state".
+
+
+```{r}
+#Summary tables for the variable "state"
+table(eclipse$state, useNA = "always")
+prop.table(table(eclipse$state))
+```
+
+
+For the variable "state", the most represented state is Pennsylvania, with 3,776 observations (5.9%). The least represented state (not including D.C.) is Rhode Island, with 72 observations (0.1%).There are no missing observations for "state".
+
+
+Let's also explore the variable "year".
+
+
+```{r}
+#Summary tables for the variable "year"
+table(eclipse$year, useNA = "always")
+prop.table(table(eclipse$year))
+```
+
+
+For the variable "year", exactly half of the observations are from 2023 (32,174), and half of the observations are from 2024 (32,174).There are no missing observations for "year".
+
+
+Finally, let's explore the variable "type".
+
+
+```{r}
+#Summary tables for the variable "type"
+table(eclipse$type, useNA = "always")
+prop.table(table(eclipse$type))
+```
+
+
+For the variable "type", 93.6% of the observations are partial eclipses, 5.2% are total eclipses, and 1.3% are annular eclipses. There are no missing observations for "type".
+
+
+Here is a summary table of the variables, stratified by eclipse type.
+
+
+```{r}
+#Create a summary table of the variables
+eclipse %>% tbl_summary(by = type, 
+                        include = c(duration, eclipse_3, state, year), 
+                        statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
+  modify_caption("Summary Table of U.S. Solar Eclipse Data, Stratified by Eclipse Type")
+```
+
+
+Here is another summary table of the variables, stratified year.
+
+
+```{r}
+#Create a summary table of the variables
+eclipse %>% tbl_summary(by = year, 
+                        include = c(duration, eclipse_3, state, type), 
+                        statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
+  modify_caption("Summary Table of U.S. Solar Eclipse Data, Stratified by Year")
+```
+
+
+Now let's create a scatterplot between the variables "duration" and "eclipse_3", as well as a correlation table.
+
+
+```{r}
+#Create scatterplot between "duration" and "ecplise_3"
+ggplot(eclipse, aes(x = duration, y = eclipse_3)) +
+  geom_point() +
+  labs(x = "Duration", y = "Time of Maximum Eclipse") +
+  ggtitle("Scatterplot of Duration vs. Time of Maximum Eclipse")
+
+#Create a correlation matrix between "duration" and "eclipse_3"
+cor(eclipse$duration, eclipse$eclipse_3)
+```
+
+
+Based on the scatterplot and correlation matrix, there doesn't seem to be a strong correlation between "duration" and "eclipse_3".
+
+
+Next let's create some boxplots between the variable "duration" and the variables "year" and "type".
+
+
+```{r}
+#Create a boxplot of "duration" and "year"
+ggplot(eclipse, aes(x = factor(year), y = duration)) +
+  geom_boxplot() +
+  labs(x = "Year", y = "Eclipse Duration (hours)", title = "Boxplot of Year and Eclipse Duration")
+
+#Create a boxplot of "duration" and "type"
+ggplot(eclipse, aes(x = factor(type), y = duration)) +
+  geom_boxplot() +
+  labs(x = "Eclipse Type", y = "Eclipse Duration (hours)", title = "Boxplot of Eclipse Type and Eclipse Duration")
+```
+
+
+The boxplots between "duration" and "year" and "type" show relatively normal distributions. The mean eclipse duration is greatest for 2023 and annular eclipses. 
+
+
+Finally, let's look at the stratified boxplots.
+
+
+```{r}
+#Create a boxplot of "duration" and "year", stratified by "type"
+ggplot(eclipse, aes(x = factor(year), y = duration, fill = factor(type))) +
+  geom_boxplot() +
+  labs(x = "Year", y = "Eclipse Duration (hours)", title = "Boxplot of Year and Eclipse Duration, Stratified by Eclipse Type") +
+  scale_fill_discrete(name = "Eclipse Type")
+
+#Create a boxplot of "duration" and "type", stratified by "year"
+ggplot(eclipse, aes(x = factor(type), y = duration, fill = factor(year))) +
+  geom_boxplot() +
+  labs(x = "Eclipse Type", y = "Eclipse Duration (hours)", title = "Boxplot of Eclipse Type and Eclipse Duration, Stratified, by Year") +
+  scale_fill_discrete(name = "Year")
+```
+
+
+The stratified boxplots show relatively normal distributions across all strata. For each year, partial eclipses had shorter eclipse duration than annular/total eclipses. The comparisons of eclipse by year shows that 2024 partial eclipses had shorter eclipse duration than 2023 partial eclipses.
+
+
+# Question/Hypothesis
+
+Is eclipse type associated with eclipse duration among solar eclipses?
+
+
+# Data Processing (Part 2)
+
+
+Let's further process the data and split it into train/test data.
+
+
+```{r}
+#Create a subset dataset with only "eclipse_3", "year", "type" and "duration"
+eclipse2 <- eclipse[, c("eclipse_3", "year", "type", "duration")]
+
+#Rename the "eclipse_3" variable to "maxtime"
+eclipse2 <- eclipse2 %>% rename(maxtime = eclipse_3)
+
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Split the data randomly into 75% train and 25% test set
+data_split <- initial_split(eclipse2, prop = 3/4)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+```
+
+
+# Model Fitting
+
+
+Now let's fit some linear models using "duration" as the outcome and 10-fold cross-validation for model training. First, let's start with the predictor of interest, "type".
+
+
+```{r}
+#Fit a linear model to the outcome "duration" using "type" as the predictor
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit1 <- linear_model %>% fit(duration ~ type, data = train_data)
+tidy(linear_fit1)
+
+#Define the training control as cross-validation and K = 10 folds
+train_control <- trainControl(method = "cv", number = 10)
+
+#Fit a linear model to the outcome "duration" using "type" as the predictor
+model1 <- train(duration ~ type, data = train_data, method = "lm", trCrontol = train_control)
+
+#Print RMSE and R-squared for Model 1
+print(model1)
+```
+
+
+In Model 1, the predictor "type" is significantly associated with the outcome "duration" (p-values < 0.001). Compared to annular eclipses, the predicted eclipse duration decreases by 0.33 hours for partial eclipses and decreases by 0.36 hours for total eclipses. R-squared = 0.009 indicates that 0.9% of the variability in eclipse duration is explained by the model. RMSE = 0.39 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+Next let's fit a linear model with the outcome, "duration", and the predictor variables "type" and "year".
+
+
+```{r}
+#Fit a linear model to the outcome "duration" using "type" and "year" as the predictors
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit2 <- linear_model %>% fit(duration ~ type + year, data = train_data)
+tidy(linear_fit2)
+
+#Define the training control as cross-validation and K = 10 folds
+train_control <- trainControl(method = "cv", number = 10)
+
+#Fit a linear model to the outcome "duration" using "type" and "year" as the predictors
+model2 <- train(duration ~ type + year, data = train_data, method = "lm", trCrontol = train_control)
+
+#Print RMSE and R-squared for Model 2
+print(model2)
+```
+
+
+In Model 2, the predictors "type" and "year" are significantly associated with the outcome "duration" (p-values < 0.001). Compared to annular eclipses and controlling for year, the predicted eclipse duration decreases by 0.15 hours for partial eclipses and increase by 0.0001 hours for total eclipses. R-squared = 0.206 indicates that 20.6% of the variability in eclipse duration is explained by the model. RMSE = 0.35 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+Then let's fit a linear model with the outcome, "duration", and the predictor variables "type", "year", and "maxtime".
+
+
+```{r}
+#Fit a linear model to the outcome "duration" using "type", "year", and "maxtime" as the predictors
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit3 <- linear_model %>% fit(duration ~ type + year + maxtime, data = train_data)
+tidy(linear_fit3)
+
+#Define the training control as cross-validation and K = 10 folds
+train_control <- trainControl(method = "cv", number = 10)
+
+#Fit a linear model to the outcome "duration" using "type", "year", and "maxtime" as the predictors
+model3 <- train(duration ~ type + year + maxtime, data = train_data, method = "lm", trCrontol = train_control)
+
+#Print RMSE and R-squared for Model 3
+print(model3)
+```
+
+
+In Model 3, the predictors "type", "year", and "maxtime" are significantly associated with the outcome "duration" (p-values < 0.001). Compared to annular eclipses and controlling for year and time of maximum eclipse, the predicted eclipse duration decreases by 0.20 hours for partial eclipses and decreases by 0.08 hours for total eclipses. R-squared = 0.467 indicates that 46.7% of the variability in eclipse duration is explained by the model. RMSE = 0.29 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+It's beneficial to consider both RMSE (prioritizes prediction accuracy) and R-squared (priortizes explaining variance) when evaluating model performance. Based on the lowest RMSE value and the highest R-squared value, the model with the best performance is Model 3 with all predictors.
+
+
+# Plotting Residuals and Observed and Predicted Values
+
+
+First let's create a figure that plots observed values versus predicted values for the three original model fits to all of the training data.
+
+
+```{r}
+#Compute the predicted values for the three models
+predicted1 <- predict(linear_fit1, new_data = train_data)
+predicted2 <- predict(linear_fit2, new_data = train_data)
+predicted3 <- predict(linear_fit3, new_data = train_data)
+
+#Create a data frame with the observed values and predicted values from the three models
+predictions <- data.frame(
+  observed = train_data$duration,
+  model1 = predicted1,
+  model2 = predicted2,
+  model3 = predicted3)
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(predictions, aes(x = observed)) +
+  geom_point(aes(y = .pred, color = "Model 1")) +
+  geom_point(aes(y = .pred.1, color = "Model 2")) +
+  geom_point(aes(y = .pred.2, color = "Model 3")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Three Models") +
+  theme_minimal()
+```
+
+
+None of the three models shows data points that fall along the dashed diagonal line that represents agreement between observed and predicted values. Model 3 with all predictors looks relatively the best as some points fall relatively along the dashed diagonal line. Perhaps there are aspects of the outcome pattern that the model cannot explain.
+
+
+Now let's create a figure that plots predicted values versus residuals for each model.
+
+
+```{r}
+#Fit the linear model and create a data frame
+linmodel1 <- lm(duration ~ type, data = train_data)
+linmodel1f <- fortify(linmodel1)
+
+#Create a figure that plots predicted values on the x-axis and residuals on the y-axis
+ggplot(linmodel1f, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  ylim(-3, 3) +
+  labs(x = "Predicted Values", y = "Residuals", title = "Predicted Values vs. Residuals for Model 1") +
+  theme_minimal()
+```
+
+
+There is no discernible pattern in the plot of predicted values versus residuals for Model 1.
+
+
+```{r}
+#Fit the linear model and create a data frame
+linmodel2 <- lm(duration ~ type + year, data = train_data)
+linmodel2f <- fortify(linmodel2)
+
+#Create a figure that plots predicted values on the x-axis and residuals on the y-axis
+ggplot(linmodel2f, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  ylim(-3, 3) +
+  labs(x = "Predicted Values", y = "Residuals", title = "Predicted Values vs. Residuals for Model 2") +
+  theme_minimal()
+```
+
+
+There is no discernible pattern in the plot of predicted values versus residuals for Model 2.
+
+
+```{r}
+#Fit the linear model and create a data frame
+linmodel3 <- lm(duration ~ type + year + maxtime, data = train_data)
+linmodel3f <- fortify(linmodel3)
+
+#Create a figure that plots predicted values on the x-axis and residuals on the y-axis
+ggplot(linmodel3f, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  ylim(-3, 3) +
+  labs(x = "Predicted Values", y = "Residuals", title = "Predicted Values vs. Residuals for Model 3") +
+  theme_minimal()
+```
+
+
+There is no discernible pattern in the plot of predicted values versus residuals for Model 3.
+
+
+Finally, let's use the bootstrap method to sample the data, fit each model to the data, and measure uncertainty in our predictions. Let's create a figure that plots observed versus predicted values for each model.
+
+
+```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Create 100 bootstraps using the training data
+dat_bs <- bootstraps(train_data, times = 100)
+
+#Create an empty matrix to store predictions
+pred_bs <- matrix(nrow = nrow(train_data), ncol = 100)
+
+#Use a loop to fit Model 1 to each bootstrap sample and make predictions for the training data
+for(i in 1:100) {
+  dat_sample <- analysis(dat_bs$splits[[i]])
+  model <- lm(duration ~ type, data = dat_sample)
+  predictions <- predict(model, newdata = train_data)
+  pred_bs[, i] <- predictions
+}
+
+#Compute the median and 95% confidence intervals
+preds <- apply(pred_bs, 1, function(x) {quantile(x, c(0.025, 0.5, 0.975))}) %>% t()
+preds <- data.frame(preds)
+
+#Add the median and confidence intervals to the same data frame as the observed and predicted values for Model 1
+linmodel1f$lower <- preds$X2.5.
+linmodel1f$median <- preds$X50.
+linmodel1f$upper <- preds$X97.5.
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(linmodel1f, aes(x = duration)) +
+  geom_point(aes(y = .fitted, color = "Point Estimates")) +
+  geom_point(aes(y = lower, color = "Lower Bounds")) +
+  geom_point(aes(y = median, color = "Medians")) +
+  geom_point(aes(y = upper, color = "Upper Bounds")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Model 1") +
+  theme_minimal()
+```
+
+
+In general, the medians and confidence intervals in the plot follow the same pattern as the point estimates for Model 1, although the pattern is not diagonal. There may be aspects of the outcome that the model cannot explain.
+
+
+```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Create 100 bootstraps using the training data
+dat_bs <- bootstraps(train_data, times = 100)
+
+#Create an empty matrix to store predictions
+pred_bs <- matrix(nrow = nrow(train_data), ncol = 100)
+
+#Use a loop to fit Model 1 to each bootstrap sample and make predictions for the training data
+for(i in 1:100) {
+  dat_sample <- analysis(dat_bs$splits[[i]])
+  model <- lm(duration ~ type + year, data = dat_sample)
+  predictions <- predict(model, newdata = train_data)
+  pred_bs[, i] <- predictions
+}
+
+#Compute the median and 95% confidence intervals
+preds <- apply(pred_bs, 1, function(x) {quantile(x, c(0.025, 0.5, 0.975))}) %>% t()
+preds <- data.frame(preds)
+
+#Add the median and confidence intervals to the same data frame as the observed and predicted values for Model 1
+linmodel2f$lower <- preds$X2.5.
+linmodel2f$median <- preds$X50.
+linmodel2f$upper <- preds$X97.5.
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(linmodel2f, aes(x = duration)) +
+  geom_point(aes(y = .fitted, color = "Point Estimates")) +
+  geom_point(aes(y = lower, color = "Lower Bounds")) +
+  geom_point(aes(y = median, color = "Medians")) +
+  geom_point(aes(y = upper, color = "Upper Bounds")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Model 2") +
+  theme_minimal()
+```
+
+
+In general, the medians and confidence intervals in the plot follow the same pattern as the point estimates for Model 2, although the pattern is not diagonal. There may be aspects of the outcome that the model cannot explain.
+
+
+```{r}
+#Set a seed
+rngseed = 1234
+set.seed(rngseed)
+
+#Create 100 bootstraps using the training data
+dat_bs <- bootstraps(train_data, times = 100)
+
+#Create an empty matrix to store predictions
+pred_bs <- matrix(nrow = nrow(train_data), ncol = 100)
+
+#Use a loop to fit Model 1 to each bootstrap sample and make predictions for the training data
+for(i in 1:100) {
+  dat_sample <- analysis(dat_bs$splits[[i]])
+  model <- lm(duration ~ type + year + maxtime, data = dat_sample)
+  predictions <- predict(model, newdata = train_data)
+  pred_bs[, i] <- predictions
+}
+
+#Compute the median and 95% confidence intervals
+preds <- apply(pred_bs, 1, function(x) {quantile(x, c(0.025, 0.5, 0.975))}) %>% t()
+preds <- data.frame(preds)
+
+#Add the median and confidence intervals to the same data frame as the observed and predicted values for Model 1
+linmodel3f$lower <- preds$X2.5.
+linmodel3f$median <- preds$X50.
+linmodel3f$upper <- preds$X97.5.
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(linmodel3f, aes(x = duration)) +
+  geom_point(aes(y = .fitted, color = "Point Estimates")) +
+  geom_point(aes(y = lower, color = "Lower Bounds")) +
+  geom_point(aes(y = median, color = "Medians")) +
+  geom_point(aes(y = upper, color = "Upper Bounds")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for Model 3") +
+  theme_minimal()
+```
+
+
+In general, the medians and confidence intervals in the plot follow the same pattern as the point estimates for Model 3, although the pattern is not diagonal. There may be aspects of the outcome that the model cannot explain.
+
+
+# Fitting Models (Part 2)
+
+
+Let's try fitting a random forest model.
+
+
+```{r}
+#Fit the random forest model
+rf_recipe <- recipe(duration ~ type + year + maxtime, data = train_data)
+
+rf_spec <- rand_forest(mode = "regression") %>% set_engine("ranger", seed = rngseed)
+
+wflow4 <- workflow() %>%
+  add_recipe(rf_recipe) %>%
+  add_model(rf_spec)
+
+fit4 <- wflow4 %>% fit(data = train_data)
+
+#Make predictions
+predictions_rf <- augment(fit4, new_data = train_data) %>%
+  mutate(observed = train_data$duration) %>%
+  rename(predicted = .pred)
+
+#Compute RMSE and R-squared
+metrics_rf <- fit4 %>% 
+  predict(train_data) %>% 
+  bind_cols(train_data) %>% 
+  metrics(truth = duration, estimate = .pred)
+
+print(metrics_rf)
+
+#Plot observed vs. predicted values
+ggplot(predictions_rf, aes(x = observed, y = predicted)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Random Forest Model") +
+  theme_minimal()
+```
+
+
+In Model 4, R-squared = 0.517 indicates that 51.7% of the variability in eclipse duration is explained by the model. RMSE = 0.28 represents the average distance between the predicted values from the model and the actual values in the dataset. 
+
+
+Comparing all four models, the RMSE values are lowest for the linear regression model with all predictors (Model 3) and the random forest model (Model 4). We conclude that these models perform the best. Because the RMSE values for Model 3 and Model 4 are nearly identical, let's pick Model 3 as the overall best since it's simpler and easier to interpret.
+
+
+# Evaluating with the Test Data
+
+
+Let's do a final model evaluation, this time using the test data. First, let's use the fit of Model 3 on the training data to make predictions for the test data. Then let's make a plot that shows predicted versus observed values for both the training data and the test data.
+
+
+```{r}
+#Create a data frame with the observed and predicted values for the training data
+mod3_df <- lm(duration ~ type + year + maxtime, data = train_data)
+mod3_df3 <- fortify(mod3_df)
+
+#Make predictions for the test data
+pred_test <- as.data.frame(predict(mod3_df, newdata = test_data))
+
+#Add the Y values to the same data frame as the test data predictions
+mod3_df3_test <- fortify(lm(duration ~ type + year + maxtime, data = test_data))
+
+#Combine the data frames with the observed and predicted values for the test data
+combined_test <- cbind(mod3_df3_test, pred_test)
+
+#Merge the data frames with the training data and test data predictions
+merged <- merge(mod3_df3, combined_test, by = "duration", all = TRUE)
+
+#Rename the test data predictions variable
+merged <- merged %>% rename(pred_test = `predict(mod3_df, newdata = test_data)`)
+
+#Create a figure that plots observed values on the x-axis and predicted values on the y-axis
+ggplot(merged, aes(x = duration)) +
+  geom_point(aes(y = .fitted.x, color = "Training Data"), alpha = 0.7) +
+  geom_point(aes(y = pred_test, color = "Test Data"), alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(x = "Observed Values", y = "Predicted Values", title = "Observed vs. Predicted Values for the Training and Test Data") +
+  theme_minimal()
+```
+
+
+The plot shows that the observed and predicted values for the test data are mixed in with the training data, which is what we want to see. If the test data points were systematically "off", then it would indicate a problem, such as overfitting to the training data.
+
+
+Let's also create a figure that plots predicted values versus residuals for Model 3.
+
+
+```{r}
+#Fit the linear model and create a data frame
+linmodel3 <- lm(duration ~ type + year + maxtime, data = test_data)
+linmodel3f <- fortify(linmodel3)
+
+#Create a figure that plots predicted values on the x-axis and residuals on the y-axis
+ggplot(linmodel3f, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  ylim(-3, 3) +
+  labs(x = "Predicted Values", y = "Residuals", title = "Predicted Values vs. Residuals for Model 3") +
+  theme_minimal()
+```
+
+
+There is no discernible pattern in the plot of predicted values versus residuals for Model 3.
+
+
+Next let's look at model performance metrics and uncertainty for Model 3.
+
+
+```{r}
+#Fit a linear model to the outcome "duration" using "type", "year", and "maxtime" as the predictors
+linear_model <- linear_reg() %>% set_engine("lm")
+linear_fit3 <- linear_model %>% fit(duration ~ type + year + maxtime, data = test_data)
+tidy(linear_fit3)
+
+#Uncertainty
+model <- lm(duration ~ type + year + maxtime, data = test_data)
+Confint(model)
+
+#Compute RMSE and R-squared
+metrics <- linear_fit3 %>% 
+  predict(test_data) %>% 
+  bind_cols(test_data) %>% 
+  metrics(truth = duration, estimate = .pred)
+
+#Print RMSE and R-squared
+print(metrics)
+```
+
+
+In Model 3, the predictors "type", "year", and "maxtime" are significantly associated with the outcome "duration" (p-values < 0.001). Compared to annular eclipses and controlling for year and time of maximum eclipse, the predicted eclipse duration decreases by 0.21 hours for partial eclipses (95% CI: -0.25, -0.17) and decreases by 0.09 hours for total eclipses (95% CI: -0.14, -0.04). R-squared = 0.458 indicates that 45.8% of the variability in eclipse duration is explained by the model. RMSE = 0.29 represents the average distance between the predicted values from the model and the actual values in the dataset.
+
+
+# Discussion
+
+
+We used data on 2023-2024 U.S. solar eclipses to investigate whether eclipse type is associated with eclipse duration among solar eclipses. The other predictors were year and time of maximum eclipse. We looked at three linear regression models and a random forest model. The linear regression model with all three predictors and the random forest model with all three predictors performed the best based on RMSE values. We chose the linear regression model for simplicity of interpretation. All three predictors were significantly associated with eclipse duration. Compared to annular eclipses and controlling for year and time of maximum eclipse, the predicted eclipse duration decreases by 0.20 hours for partial eclipses (95% CI: -0.22, -0.18) and decreases by 0.09 hours for total eclipses (95% CI: -0.11, -0.06) (see table below).
+
+
+```{r}
+#Fit the linear regression model
+model <- lm(duration ~ type + year + maxtime, data = eclipse2)
+
+#Get the coefficients
+coefficients <- tidy(model)
+
+#Obtain 95% confidence intervals for coefficients
+conf_intervals <- confint(model)
+
+#Combine coefficients and confidence intervals by matching row names
+combined_data <- cbind(coefficients, conf_intervals)
+
+#Remove the intercept row
+combined_data <- combined_data %>%
+  filter(term != "(Intercept)")
+
+#Rename and relabel columns
+combined_data <- combined_data %>%
+  mutate(term = ifelse(term == "typepartial", "Partial Eclipse", 
+                       ifelse(term == "typetotal", "Total Eclipse", 
+                              ifelse(term == "year2024", "Year 2024", 
+                                     ifelse(term == "maxtime", "Time of Maximum Eclipse", term))))) %>%
+  rename("Beta Estimate" = estimate,
+         "Lower 95% CI" = `2.5 %`,
+         "Upper 95% CI" = `97.5 %`)
+
+#Keep only the desired columns
+combined_data <- subset(combined_data, select = -c(std.error, statistic, p.value))
+
+#Display the summary table
+print(combined_data)
+```
+
